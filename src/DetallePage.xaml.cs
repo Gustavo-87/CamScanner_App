@@ -11,8 +11,8 @@ public partial class DetallePage : ContentPage
     private bool _avisoAbreEditor;
     private int _avisoId;
 
-    /// <summary>Se dispara después de cambiar el nombre, para que la lista se actualice.</summary>
-    public event Action<Documento>? Renombrado;
+    /// <summary>Se dispara después de cambiar datos del documento.</summary>
+    public event Action<Documento>? Actualizado;
 
     /// <summary>Se dispara cuando el usuario confirma eliminar; quien lo recibe borra archivo y registro.</summary>
     public event Action<Documento>? Eliminado;
@@ -63,8 +63,8 @@ public partial class DetallePage : ContentPage
                 return;
             }
 
-            // TODO: al integrar SQLite, persistir TextoExtraido (UpdateAsync)
             _doc.TextoExtraido = resultado.AllText;
+            Actualizado?.Invoke(_doc);
             await MostrarAvisoAsync("Texto listo · Toca para ver", abreEditor: true);
         }
         catch (Exception ex)
@@ -83,8 +83,8 @@ public partial class DetallePage : ContentPage
         var pagina = new TextoPage(_doc.Nombre, _doc.TextoExtraido ?? string.Empty);
         pagina.Guardado += texto =>
         {
-            // TODO: al integrar SQLite, persistir TextoExtraido (UpdateAsync)
             _doc.TextoExtraido = texto;
+            Actualizado?.Invoke(_doc);
         };
         await Navigation.PushAsync(pagina);
     }
@@ -171,10 +171,9 @@ public partial class DetallePage : ContentPage
         if (string.IsNullOrWhiteSpace(nuevo))
             return;
 
-        // TODO: al integrar SQLite, persistir el cambio (UpdateAsync)
         _doc.Nombre = nuevo.Trim();
         TituloLabel.Text = _doc.Nombre;
-        Renombrado?.Invoke(_doc);
+        Actualizado?.Invoke(_doc);
     }
 
     private async void OnEliminarTapped(object? sender, TappedEventArgs e)
