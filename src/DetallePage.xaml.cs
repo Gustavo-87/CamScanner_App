@@ -1,11 +1,11 @@
 using CamScanner.Models;
-using Plugin.Maui.OCR;
 
 namespace CamScanner;
 
 public partial class DetallePage : ContentPage
 {
     private readonly Documento _doc;
+    private readonly IOcrService _ocrService; // Instancia de abstracción de servicio nativo avanzado
 
     private bool _ocrEnCurso;
     private bool _avisoAbreEditor;
@@ -17,17 +17,24 @@ public partial class DetallePage : ContentPage
     /// <summary>Se dispara cuando el usuario confirma eliminar; quien lo recibe borra archivo y registro.</summary>
     public event Action<Documento>? Eliminado;
 
-    public DetallePage(Documento doc)
+    // Constructor óptimo utilizando el contenedor de inyección de dependencias de .NET MAUI
+    public DetallePage(Documento doc, IOcrService ocrService)
     {
         InitializeComponent();
         _doc = doc;
+        _ocrService = ocrService;
         TituloLabel.Text = doc.Nombre;
         Imagen.Source = ImageSource.FromFile(doc.RutaImagen);
     }
 
+    /// <summary>Constructor secundario por si se instancia manualmente sin pasar por el contenedor de dependencias.</summary>
+    public DetallePage(Documento doc) : this(doc, App.Current?.Handler?.MauiContext?.Services.GetService<IOcrService>()!)
+    {
+    }
+
     private async void OnAtrasClicked(object? sender, EventArgs e) => await Navigation.PopAsync();
 
-    // ================= OCR =================
+    // ================= OCR MEJORADO =================
 
     private async void OnTextoTapped(object? sender, TappedEventArgs e)
     {
@@ -52,24 +59,25 @@ public partial class DetallePage : ContentPage
 
         try
         {
-            await OcrPlugin.Default.InitAsync();
+            // Inicializa el motor nativo de la plataforma correspondiente (iOS/Android)
+            await _ocrService.InitAsync();
 
-            var bytes = await File.ReadAllBytesAsync(_doc.RutaImagen);
-            var resultado = await OcrPlugin.Default.RecognizeTextAsync(bytes);
+            // Pasamos la ruta del archivo de forma directa. Ahorramos lecturas innecesarias en bytes
+            var textoDetectado = await _ocrService.RecognizeTextAsync(_doc.RutaImagen);
 
-            if (!resultado.Success || string.IsNullOrWhiteSpace(resultado.AllText))
+            if (string.IsNullOrWhiteSpace(textoDetectado))
             {
                 await MostrarAvisoAsync("No se detectó texto", abreEditor: false);
                 return;
             }
 
             // TODO: al integrar SQLite, persistir TextoExtraido (UpdateAsync)
-            _doc.TextoExtraido = resultado.AllText;
+            _doc.TextoExtraido = textoDetectado;
             await MostrarAvisoAsync("Texto listo · Toca para ver", abreEditor: true);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error de OCR: {ex}");
+            System.Diagnostics.Debug.WriteLine($"Error de OCR Nativo: {ex}");
             await MostrarAvisoAsync("No se pudo reconocer el texto", abreEditor: false);
         }
         finally
