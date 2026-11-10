@@ -44,10 +44,40 @@
     <Grid>
 
         <!-- Contenido principal con padding (el menú inferior queda fuera para cubrir toda la pantalla) -->
-        <Grid Padding="16">
+        <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
+
+            <!-- ============ LISTA DE LOTES ============ -->
+            <VerticalStackLayout Grid.Row="0" Spacing="6">
+                <Label Text="Mis lotes" FontSize="18" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+                <CollectionView x:Name="LotesView" ItemsSource="{Binding Lotes}" HeightRequest="82"
+                                SelectionMode="Single" SelectionChanged="OnLoteSeleccionado">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.EmptyView>
+                        <Label Text="Aún no hay lotes" VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Lote">
+                            <Border WidthRequest="180" Padding="12" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Nombre}" FontAttributes="Bold" LineBreakMode="TailTruncation"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+                                    <Label Text="{Binding FechaCreacion, StringFormat='{0:dd MMM yyyy}'}" FontSize="12"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
 
             <!-- ============ LISTA DE DOCUMENTOS ============ -->
-            <CollectionView ItemsSource="{Binding Documentos}" SelectionMode="None">
+            <CollectionView Grid.Row="1" ItemsSource="{Binding Documentos}" SelectionMode="None">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8" Padding="40">
                         <Label Text="📄" FontSize="64" HorizontalOptions="Center" />
@@ -99,7 +129,7 @@
             </CollectionView>
 
             <!-- ============ BOTÓN FLOTANTE (+) ============ -->
-            <Button x:Name="Fab" Text="+" FontSize="32" Padding="0,0,0,4"
+            <Button x:Name="Fab" Grid.Row="1" Text="+" FontSize="32" Padding="0,0,0,4"
                 WidthRequest="60" HeightRequest="60" CornerRadius="30"
                 HorizontalOptions="End" VerticalOptions="End"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"

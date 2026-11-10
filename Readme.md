@@ -1,180 +1,115 @@
-# CamScanner — App de Supervisión en Campo
+# CamScanner — Seguimiento 1
 
----
+Proyecto académico de Ingeniería de Software II (2026-2). Aplicación móvil desarrollada con **C#, .NET 10 y .NET MAUI**, con Android como plataforma principal.
 
-## 1. Equipo y roles
+## Objetivo del proyecto
 
-| Integrante         | Rol                                     | Responsabilidad principal                                                                                                                    |
-| ------------------ | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gustavo Piedrahita | Líder técnico                         | Coordina el alcance, la arquitectura y la integración de los cambios.                                                                       |
-| Javier Serna       | Responsable de pruebas                  | Diseña los casos de prueba y coordina su automatización.                                                                                   |
-| Richard Prado      | Responsable de calidad y documentación | Revisa el código, registra defectos, propone acciones de mantenimiento y mantiene el README, los documentos y la evidencia de las entregas. |
+Digitalizar documentos mediante captura con cámara o importación de imágenes, **OCR local**, revisión y corrección de la información reconocida, organización en **lotes**, persistencia con **SQLite** y exportación a **Excel**. Se trata del alcance previsto para el producto final; **no todas las funcionalidades están implementadas en Seguimiento 1**.
 
-> Los roles orientan la responsabilidad principal, pero cada integrante conoce y responde por todo el código del repositorio.
+## Estado de la entrega — 2 de noviembre de 2026
 
----
+| Componente | Estado |
+|---|---|
+| Estructura del proyecto .NET MAUI | Implementada; compilación Android comprobada |
+| Captura de fotos y listado de documentos | Implementados y comprobados en dispositivo físico |
+| Importación de imágenes de la galería | Código implementado; pendiente verificación independiente en la entrega |
+| Previsualización y opciones básicas de documentos | Código incluido; cobertura manual parcial |
+| OCR local | Integración y pantallas incorporadas como avance; validación completa pendiente |
+| Modelos `Lote` y `Documento` | Implementados |
+| Capa SQLite | Base inicial implementada; falta integrar gestión completa a la interfaz |
+| Selección y corrección estructurada de información OCR | Pendiente de completar |
+| Exportación individual y consolidada a Excel | Pendiente |
+| Pruebas xUnit de nombres y almacenamiento de imágenes | **29 de 29 aprobadas** en la revisión de integración |
+| Instalación y apertura en Android | Comprobadas en tableta |
 
-## 2. Descripción del proyecto
+La aplicación **no está terminada**. Esta entrega demuestra una base técnica, funcionalidades iniciales, pruebas y participación del equipo.
 
-**CamScaner** es una aplicación móvil multiplataforma, desarrollada con **.NET MAUI y C#**, pensada para agilizar los procesos de supervisión logística que hoy se realizan de forma manual y lenta.
+## Equipo y responsabilidades
 
-La app permitirá **capturar fotografías** con el dispositivo o **importarlas de forma masiva** desde la galería, **nombrarlas y organizarlas**, y **empaquetarlas** en un archivo ZIP o en un PDF con las imágenes y sus nombres en cuadrícula, listos para enviar o compartir.
+| Integrante | Rol | Aporte en Seguimiento 1 |
+|---|---|---|
+| Gustavo Piedrahita | Líder técnico | Arquitectura, modelos, SQLite, integración y verificación |
+| Javier Serna | Desarrollo y pruebas | Captura/importación, avance OCR, pruebas automatizadas |
+| Richard Prado | Calidad y documentación | Especificación, criterios de aceptación, plan y documentación de calidad |
 
-### Objetivo general
+El historial de Git y los enlaces de las tarjetas de Trello documentan la participación individual.
 
-Optimizar el trabajo de los supervisores en campo mediante la digitalización del registro fotográfico y su posterior envío.
+## Estructura del repositorio
 
-### Objetivos específicos
-
-1. Permitir el registro fotográfico en campo (cámara y galería) sin procesos manuales.
-2. Empaquetar las imágenes en un `.zip` con nombres definidos por el usuario.
-3. Generar un PDF con las imágenes y sus nombres en cuadrícula, como reporte visual.
-4. Facilitar el envío del ZIP, del PDF y de imágenes individuales mediante las opciones de compartir del dispositivo.
-5. Verificar la aplicación con casos de prueba diseñados con las técnicas vistas en clase y automatizados en parte.
-6. Evaluar la calidad del producto, registrar defectos y proponer acciones de mantenimiento.
-
-### Beneficios esperados
-
-- Eliminar procesos manuales y repetitivos.
-- Ahorrar tiempo en la supervisión y en el envío de reportes fotográficos.
-- Aumentar la eficiencia y la productividad en operaciones logísticas.
-- Ser accesible para cualquier supervisor sin conocimientos técnicos.
-
-### Origen de la idea
-
-La idea parte de una aplicación previa de supervisión en campo. El proyecto final se desarrolla como una aplicación nueva, con repositorio propio.
-
-## 3. Alcance
-
-### Versión inicial
-
-- Captura de foto desde la cámara del dispositivo.
-- Selección múltiple de imágenes desde la galería.
-- Asignación de título al paquete y de nombre a cada imagen.
-- Eliminación de imágenes de la lista antes de exportar.
-- Generación de un archivo `.zip` con las imágenes renombradas.
-- Generación de un archivo `.pdf` con las imágenes y sus nombres ordenados en cuadrículas.
-- Compartir el ZIP, el PDF o una imagen individual mediante el menú nativo del dispositivo.
-- Validaciones de entrada y manejo de errores con mensajes al usuario.
-
-### Mejoras y funciones futuras
-
-Una vez terminada la versión inicial, el equipo evaluará mejoras como:
-
-- Guardar los reportes y sus fotos en una base de datos local, con un historial consultable.
-- Conservar la proporción de las fotos y manejar nombres largos en el PDF.
-- Procesar el ZIP y el PDF en segundo plano para lotes grandes.
-- Otras funciones que surjan durante el desarrollo.
-
-### Fuera del alcance (por ahora)
-
-- Sincronización con servidores o servicios en la nube.
-- Autenticación de usuarios.
-- Edición de imágenes (recorte, filtros, anotaciones).
-
-> El alcance se mantiene pequeño a propósito: es preferible un producto acotado y bien terminado que uno ambicioso y frágil.
-
----
-
-## 4. Requerimientos
-
-### 4.1 Funcionales
-
-| ID    | Requerimiento                                                                                                                                                                                                              |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RF-01 | La app debe permitir tomar una foto con la cámara y agregarla a la lista de trabajo.                                                                                                                                      |
-| RF-02 | La app debe permitir seleccionar varias imágenes de la galería a la vez.                                                                                                                                                 |
-| RF-03 | Cada imagen agregada debe recibir un nombre editable (por defecto, un consecutivo).                                                                                                                                        |
-| RF-04 | La app debe permitir quitar una imagen de la lista.                                                                                                                                                                        |
-| RF-05 | La app debe exigir un título para el paquete antes de exportar.                                                                                                                                                           |
-| RF-06 | La app debe impedir la exportación si hay nombres de imagen repetidos o vacíos, e informar al usuario.                                                                                                                   |
-| RF-07 | La app debe impedir la exportación si la lista de imágenes está vacía.                                                                                                                                                 |
-| RF-08 | La app debe generar un `.zip` con las imágenes, nombradas según lo definido por el usuario y conservando su extensión.                                                                                                |
-| RF-09 | La app debe generar un PDF con las imágenes y sus nombres organizados en cuadrícula, agregando páginas cuando se llene una. _(Tamaño de hoja y número de imágenes por página por definir en la especificación.)_ |
-| RF-10 | La app debe permitir compartir el ZIP y el PDF generados mediante las opciones del dispositivo.                                                                                                                            |
-| RF-11 | La app debe permitir compartir una imagen individual de la lista.                                                                                                                                                          |
-| RF-12 | Ante un fallo o una cancelación al exportar, la app no debe perder la lista de imágenes del usuario.                                                                                                                     |
-| RF-13 | La app debe mostrar un mensaje claro cuando falle la captura, la selección o la exportación.                                                                                                                             |
-
-### 4.2 No funcionales
-
-| ID     | Requerimiento                                                                                                                                                                                                           |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RNF-01 | **Usabilidad:** interfaz simple, pensada para usuarios no técnicos.                                                                                                                                              |
-| RNF-02 | **Portabilidad:** compatible con Android e iOS mediante .NET MAUI.                                                                                                                                                |
-| RNF-03 | **Rendimiento:** la interfaz no debe congelarse mientras se genera el ZIP o el PDF, y la generación debe completarse en un tiempo razonable para lotes típicos. _(Umbral por definir en la especificación.)_ |
-| RNF-04 | **Confiabilidad:** ante un error, la app no debe cerrarse inesperadamente.                                                                                                                                        |
-| RNF-05 | **Seguridad y privacidad:** no se suben al repositorio contraseñas, archivos `.env` ni datos reales.                                                                                                           |
-| RNF-06 | **Mantenibilidad:** lógica separada de la interfaz y código versionado en Git con commits pequeños y descriptivos.                                                                                             |
-
-> Los criterios de aceptación de cada requerimiento se detallarán en [`docs/especificacion.md`](docs/especificacion.md).
-
----
-
-## 5. Tecnologías
-
-| Tecnología                                                               | Uso                                                        |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| .NET MAUI (C#), versión más reciente (por definir al crear el proyecto) | Desarrollo multiplataforma de la aplicación.              |
-| APIs de cámara y selección de archivos de MAUI                          | Captura de fotos e importación desde la galería.         |
-| Compresión ZIP de .NET                                                   | Creación del archivo ZIP.                                 |
-| Biblioteca de generación de PDF _(por definir)_                        | Creación del PDF con las imágenes en cuadrícula.        |
-| Opciones de compartir de MAUI                                             | Compartir los archivos generados.                          |
-| Git y GitHub                                                              | Control de versiones y entregas mediante etiquetas (tags). |
-| Trello                                                                    | Gestión del proyecto.                                     |
-
----
-
-## 6. Estructura del repositorio
-
-```
-proyecto-final/
-├── README.md
+```text
+CamScanner_App/
+├── Readme.md
 ├── docs/
-│   ├── especificacion.md     ← requisitos y criterios de aceptación
-│   ├── plan-de-pruebas.md    ← casos de prueba diseñados
-│   └── informe-calidad.md    ← defectos, métricas y mantenimiento
-├── src/                      ← código fuente (proyecto .NET MAUI)
-└── tests/                    ← pruebas automatizadas
+│   ├── especificacion.md
+│   ├── plan-de-pruebas.md
+│   └── informe-calidad.md
+├── src/
+│   ├── CamScanner.csproj
+│   ├── MainPage.xaml
+│   ├── MainPage.xaml.cs
+│   ├── DetallePage.xaml
+│   ├── TextoPage.xaml
+│   ├── Models/
+│   ├── Data/
+│   └── Services/
+└── tests/
+    └── CamScanner.Tests/
 ```
 
----
+## Requisitos para desarrollo
 
-## 7. Plan de trabajo, prioridades y riesgos
+- SDK **.NET 10** y carga de trabajo .NET MAUI para Android.
+- Android SDK y entorno de compilación correspondiente; en macOS, JDK compatible con el SDK Android.
+- Tableta/teléfono Android con depuración USB o emulador.
 
-### Actividades de la planeación
+## Ejecutar el proyecto
 
-| # | Actividad                                            | Responsable                      |
-| - | ---------------------------------------------------- | -------------------------------- |
-| 1 | Definir objetivos y alcance del proyecto             | Todo el equipo                   |
-| 2 | Identificar y documentar los requerimientos          | Líder técnico y documentación |
-| 3 | Revisar la estructura del repositorio                | Todo el equipo                   |
-| 4 | Distribuir responsabilidades entre los integrantes   | Líder técnico                  |
-| 5 | Elaborar el plan de trabajo y establecer prioridades | Líder técnico                  |
-| 6 | Definir los casos de prueba iniciales                | Responsable de pruebas           |
-| 7 | Identificar riesgos y necesidades técnicas          | Calidad y líder técnico        |
+Clonar el repositorio y entrar a la carpeta:
 
-### Riesgos y necesidades técnicas identificadas
+```bash
+git clone https://github.com/Gustavo-87/CamScanner_App.git
+cd CamScanner_App
+```
 
-| Riesgo                                                                                                                      | Impacto | Acción propuesta                                                                                      |
-| --------------------------------------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
-| Si la lógica queda mezclada con la interfaz, será difícil probarla de forma automatizada.                                | Alto    | Separar desde el diseño la lógica (nombres, ZIP, PDF) de las pantallas y ubicarla en clases propias. |
-| Permisos de cámara y almacenamiento en Android e iOS.                                                                      | Medio   | Documentar y probar el comportamiento cuando el usuario los niega.                                     |
-| Lotes grandes de fotos de alta resolución pueden consumir mucha memoria o congelar la pantalla al generar el ZIP o el PDF. | Alto    | Procesar en segundo plano, liberar recursos y probar con lotes grandes.                                |
-| Formatos de imagen no soportados por la biblioteca de PDF (por ejemplo, HEIC en iOS) o archivos que ya no existen.          | Alto    | Manejar errores y diseñar casos con formatos y archivos faltantes.                                    |
-| La biblioteca de PDF y las fuentes pueden tener restricciones de licencia o requerir configuración adicional.              | Medio   | Elegir la biblioteca temprano y revisar licencias de paquetes y fuentes.                               |
-| Títulos y nombres con caracteres no válidos para nombres de archivo (`/`, `:`) o repetidos al ignorar mayúsculas.    | Medio   | Definir reglas de validación en la especificación y probarlas con valores límite.                   |
-| Perder el trabajo del usuario si cancela o falla el menú de compartir.                                                     | Medio   | Conservar la lista hasta confirmar la exportación y probar la cancelación.                           |
-| Las pruebas de interfaz dependen de un dispositivo o emulador.                                                              | Medio   | Priorizar pruebas unitarias sobre la lógica y documentar las pruebas manuales.                        |
-| El alcance puede quedar corto frente a lo sugerido en los lineamientos (persistencia en base de datos).                     | Medio   | Acordar con el docente el alcance antes de la especificación final.                                   |
+Restaurar dependencias (si la carga MAUI no está instalada, instalarla previamente):
 
-> Estos riesgos se ampliarán durante el desarrollo en [`docs/informe-calidad.md`](docs/informe-calidad.md).
+```bash
+dotnet workload restore src/CamScanner.csproj
+dotnet restore src/CamScanner.csproj
+```
 
----
+Compilar para Android:
 
-## 8. Estrategia inicial de pruebas
+```bash
+dotnet build src/CamScanner.csproj -f net10.0-android
+```
 
-- **Técnicas de diseño:** partición de equivalencia, análisis de valores límite y tablas de decisión, según lo visto en clase.
-- **Casos iniciales a diseñar:** título vacío, nombres repetidos, nombres vacíos, lista sin imágenes, imágenes de distintas extensiones, cancelación de la cámara o de la galería y falla al compartir. Para el PDF: una sola imagen, límite de página (por ejemplo, justo al llenarse y una más), cantidad que no llena la cuadrícula, varias páginas, y nombres largos, con acentos o caracteres especiales (por ejemplo, ñ).
-- **Automatización:** pruebas unitarias sobre la lógica de validación y de generación del ZIP y del PDF, ubicadas en `tests/`.
-- **Pruebas manuales:** flujo completo en dispositivo o emulador, documentado en [`docs/plan-de-pruebas.md`](docs/plan-de-pruebas.md).
+Con un dispositivo Android configurado, ejecutar:
+
+```bash
+dotnet build src/CamScanner.csproj -f net10.0-android -t:Run
+```
+
+Ejecutar las pruebas automatizadas:
+
+```bash
+dotnet test tests/CamScanner.Tests/CamScanner.Tests.csproj
+```
+
+En la verificación del Seguimiento 1 se obtuvo **29 pruebas aprobadas, 0 fallidas y 0 omitidas**. La compilación Android fue exitosa con cuatro advertencias relacionadas con bibliotecas nativas OCR duplicadas; no impidieron generar ni ejecutar la aplicación.
+
+## Documentación y gestión
+
+- [Especificación y criterios de aceptación](docs/especificacion.md)
+- [Plan de pruebas](docs/plan-de-pruebas.md)
+- [Informe de calidad](docs/informe-calidad.md)
+- [Tablero Trello del equipo](https://trello.com/b/5W9lnNH9/camscaner-trabajo-final)
+- [Repositorio GitHub](https://github.com/Gustavo-87/CamScanner_App)
+
+### Entregas
+
+La versión del **Seguimiento 1** se identifica mediante la etiqueta `entrega-s1`. La versión del Seguimiento 2 y el producto final se entregarán en las etapas posteriores del cronograma. Los avances posteriores a la etiqueta no forman parte de ella, salvo que se publique una actualización explícita.
+
+## Próximos pasos
+
+Completar la gestión de lotes y documentos con SQLite, probar el OCR local en distintos escenarios, implementar la revisión/selección de datos y la exportación Excel; ampliar pruebas y registrar defectos y evidencias en Trello.

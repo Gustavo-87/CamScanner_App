@@ -1,18 +1,46 @@
 ﻿using System.Collections.ObjectModel;
 using CamScanner.Models;
+using CamScanner.Data;
 
 namespace CamScanner;
 
 public partial class MainPage : ContentPage
 {
     public ObservableCollection<Documento> Documentos { get; } = new();
+    public ObservableCollection<Lote> Lotes { get; } = new();
+
+    private readonly CamScannerDatabase _database;
 
     private Documento? _seleccionado;
 
-    public MainPage()
+    public MainPage(CamScannerDatabase database)
     {
         InitializeComponent();
+        _database = database;
         BindingContext = this;
+        Loaded += OnLoaded;
+    }
+
+    private async void OnLoaded(object? sender, EventArgs e)
+    {
+        try
+        {
+            var lotes = await _database.ObtenerLotesAsync();
+            var documentos = await _database.ObtenerDocumentosAsync();
+
+            Lotes.Clear();
+            Documentos.Clear();
+
+            foreach (var lote in lotes)
+                Lotes.Add(lote);
+
+            foreach (var documento in documentos)
+                Documentos.Add(documento);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", $"No se pudieron cargar los lotes: {ex.Message}", "OK");
+        }
     }
 
     // ================= Hoja inferior (bottom sheet) =================
@@ -63,6 +91,10 @@ public partial class MainPage : ContentPage
         await OcultarHojaAsync();
         try
         {
+            var lote = await SeleccionarLoteAsync();
+            if (lote is null)
+                return;
+
             if (!MediaPicker.Default.IsCaptureSupported)
             {
                 await DisplayAlertAsync("Cámara no disponible", "Este dispositivo no permite capturar fotos.", "OK");
@@ -77,7 +109,7 @@ public partial class MainPage : ContentPage
             }
 
             var foto = await MediaPicker.Default.CapturePhotoAsync();
-            await GuardarFotoAsync(foto);
+            await GuardarFotoAsync(foto, lote);
         }
         catch (Exception ex)
         {
@@ -90,6 +122,10 @@ public partial class MainPage : ContentPage
         await OcultarHojaAsync();
         try
         {
+            var lote = await SeleccionarLoteAsync();
+            if (lote is null)
+                return;
+
             var fotos = await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions
             {
                 Title = "Selecciona documentos",
@@ -100,7 +136,7 @@ public partial class MainPage : ContentPage
                 return; // el usuario canceló
 
             foreach (var foto in fotos)
-                await GuardarFotoAsync(foto);
+                await GuardarFotoAsync(foto, lote);
         }
         catch (Exception ex)
         {
@@ -111,11 +147,119 @@ public partial class MainPage : ContentPage
     private async void OnNuevoLoteTapped(object? sender, TappedEventArgs e)
     {
         await OcultarHojaAsync();
-        await DisplayAlertAsync("Próximamente", "La gestión de lotes se agregará con la base de datos SQLite.", "OK");
+
+        var nombre = await DisplayPromptAsync(
+            "Nuevo lote",
+            "Nombre del lote:",
+            accept: "Guardar",
+            cancel: "Cancelar");
+
+        if (string.IsNullOrWhiteSpace(nombre))
+            return;
+
+        try
+        {
+            var lote = new Lote
+            {
+                Nombre = nombre.Trim(),
+                FechaCreacion = DateTime.Now
+            };
+
+            await _database.GuardarLoteAsync(lote);
+            Lotes.Insert(0, lote);
+
+            await DisplayAlertAsync("Lote creado", "El lote se guardó correctamente.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", $"No se pudo guardar el lote: {ex.Message}", "OK");
+        }
     }
 
-    /// <summary>Copia la imagen al almacenamiento de la app y la agrega a la lista.</summary>
-    private async Task GuardarFotoAsync(FileResult? foto)
+    private async Task<Lote?> SeleccionarLoteAsync()
+    {
+        if (Lotes.Count == 0)
+        {
+            await DisplayAlertAsync("Crea un lote", "Crea un lote antes de agregar documentos.", "OK");
+            return null;
+        }
+
+        var opciones = Lotes
+            .Select(lote => $"{lote.Nombre} · {lote.FechaCreacion:dd/MM/yyyy}")
+            .ToArray();
+        var seleccion = await DisplayActionSheetAsync("Selecciona un lote", "Cancelar", null, opciones);
+
+        if (seleccion is null || seleccion == "Cancelar")
+            return null;
+
+        return Lotes.FirstOrDefault(lote =>
+            $"{lote.Nombre} · {lote.FechaCreacion:dd/MM/yyyy}" == seleccion);
+    }
+
+    private async void OnLoteSeleccionado(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is not Lote lote)
+            return;
+
+        LotesView.SelectedItem = null;
+
+        var accion = await DisplayActionSheetAsync(lote.Nombre, "Cancelar", null, "Editar", "Eliminar");
+        if (accion == "Editar")
+        {
+            var nombre = await DisplayPromptAsync(
+                "Editar lote",
+                "Nombre del lote:",
+                accept: "Guardar",
+                cancel: "Cancelar",
+                initialValue: lote.Nombre);
+
+            if (string.IsNullOrWhiteSpace(nombre))
+                return;
+
+            try
+            {
+                lote.Nombre = nombre.Trim();
+                await _database.GuardarLoteAsync(lote);
+                RefrescarLote(lote);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Error", $"No se pudo actualizar el lote: {ex.Message}", "OK");
+            }
+        }
+        else if (accion == "Eliminar")
+        {
+            var confirmar = await DisplayAlertAsync(
+                "Eliminar lote",
+                $"¿Eliminar \"{lote.Nombre}\"?",
+                "Eliminar",
+                "Cancelar");
+
+            if (!confirmar)
+                return;
+
+            try
+            {
+                if (!await _database.EliminarLoteAsync(lote))
+                {
+                    await DisplayAlertAsync(
+                        "No se puede eliminar",
+                        "El lote tiene documentos asociados. Elimínalos o reasígnalos primero.",
+                        "OK");
+                    return;
+                }
+
+                Lotes.Remove(lote);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Error", $"No se pudo eliminar el lote: {ex.Message}", "OK");
+            }
+        }
+    }
+
+    /// <summary>Copia la imagen al almacenamiento de la app y guarda su registro en SQLite.</summary>
+    private async Task GuardarFotoAsync(FileResult? foto, Lote lote)
     {
         if (foto is null)
             return; // el usuario canceló
@@ -132,13 +276,26 @@ public partial class MainPage : ContentPage
             await origen.CopyToAsync(destino);
         }
 
-        // TODO: al integrar SQLite, guardar aquí (InsertAsync) y asignar el LoteId real
-        Documentos.Insert(0, new Documento
+        var documento = new Documento
         {
-            Nombre = $"Documento {Documentos.Count + 1}",
+            Nombre = Path.GetFileNameWithoutExtension(foto.FileName),
             RutaImagen = ruta,
+            LoteId = lote.Id,
             FechaCreacion = DateTime.Now
-        });
+        };
+
+        try
+        {
+            await _database.GuardarDocumentoAsync(documento);
+            Documentos.Insert(0, documento);
+        }
+        catch
+        {
+            if (File.Exists(ruta))
+                File.Delete(ruta);
+
+            throw;
+        }
     }
 
     // ================= Menú contextual del documento =================
@@ -177,9 +334,8 @@ public partial class MainPage : ContentPage
         if (string.IsNullOrWhiteSpace(nuevo))
             return;
 
-        // TODO: al integrar SQLite, persistir el cambio (UpdateAsync)
         _seleccionado.Nombre = nuevo.Trim();
-        RefrescarDocumento(_seleccionado);
+        await ActualizarDocumentoAsync(_seleccionado);
     }
 
     private async void OnEliminarTapped(object? sender, TappedEventArgs e)
@@ -194,7 +350,7 @@ public partial class MainPage : ContentPage
         if (!confirmar)
             return;
 
-        QuitarDocumento(_seleccionado);
+        await EliminarDocumentoAsync(_seleccionado);
         _seleccionado = null;
     }
 
@@ -209,8 +365,8 @@ public partial class MainPage : ContentPage
     private async Task AbrirDetalleAsync(Documento doc)
     {
         var pagina = new DetallePage(doc);
-        pagina.Renombrado += RefrescarDocumento;
-        pagina.Eliminado += QuitarDocumento;
+        pagina.Actualizado += documento => _ = ActualizarDocumentoAsync(documento);
+        pagina.Eliminado += documento => _ = EliminarDocumentoAsync(documento);
         await Navigation.PushAsync(pagina);
     }
 
@@ -227,20 +383,44 @@ public partial class MainPage : ContentPage
         Documentos.Insert(indice, doc);
     }
 
-    /// <summary>Borra el archivo de imagen y quita el documento de la lista.</summary>
-    private void QuitarDocumento(Documento doc)
+    private void RefrescarLote(Lote lote)
+    {
+        var indice = Lotes.IndexOf(lote);
+        if (indice < 0)
+            return;
+
+        Lotes.RemoveAt(indice);
+        Lotes.Insert(indice, lote);
+    }
+
+    private async Task ActualizarDocumentoAsync(Documento documento)
     {
         try
         {
+            await _database.GuardarDocumentoAsync(documento);
+            RefrescarDocumento(documento);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", $"No se pudo actualizar el documento: {ex.Message}", "OK");
+        }
+    }
+
+    /// <summary>Borra el archivo de imagen y quita el documento de la lista.</summary>
+    private async Task EliminarDocumentoAsync(Documento doc)
+    {
+        try
+        {
+            await _database.EliminarDocumentoAsync(doc);
+
             if (File.Exists(doc.RutaImagen))
                 File.Delete(doc.RutaImagen);
-        }
-        catch
-        {
-            // Si el archivo no se puede borrar, igual se quita de la lista
-        }
 
-        // TODO: al integrar SQLite, borrar también el registro (DeleteAsync)
-        Documentos.Remove(doc);
+            Documentos.Remove(doc);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", $"No se pudo eliminar el documento: {ex.Message}", "OK");
+        }
     }
 }
