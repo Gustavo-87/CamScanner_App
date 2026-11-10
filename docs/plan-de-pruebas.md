@@ -43,6 +43,16 @@ Todos los casos están **Pendientes de ejecución**. La revisión estática iden
 | CP-24 | RNF-04 | Reiniciar después de guardar. | Datos disponibles nuevamente. | Pendiente |
 | CP-25 | RNF-02 | Procesar conjunto representativo de imágenes. | Duración registrada y sin bloqueos inaceptables. | Pendiente |
 | CP-26 | RNF-10 | Abrir archivo Excel generado. | Datos legibles y correspondientes a la selección. | Pendiente |
+### Casos de prueba para requisitos no funcionales
+
+| ID | Requisito | Descripción de la prueba | Resultado esperado | Estado |
+|---|---|---|---|---|
+| CP-27 | RNF-01 - Usabilidad | Revisar que las opciones principales sean comprensibles y permitan completar las operaciones sin instrucciones adicionales. | La navegación y las acciones principales son claras para el usuario. | Pendiente |
+| CP-28 | RNF-05 - Confiabilidad | Interrumpir una operación controlada y volver a utilizar la aplicación. | La aplicación responde adecuadamente y no presenta pérdida inesperada de información previamente guardada. | Pendiente |
+| CP-29 | RNF-06 - Compatibilidad Android | Instalar y ejecutar la aplicación en un dispositivo o emulador Android compatible. | La aplicación inicia y permite utilizar las funciones disponibles sin errores de compatibilidad. | Pendiente |
+| CP-30 | RNF-07 - Mantenibilidad | Revisar la organización del código, separación de responsabilidades y facilidad para identificar los componentes principales. | El código presenta una estructura comprensible y permite localizar los componentes para futuras modificaciones. | Pendiente |
+| CP-31 | RNF-08 - Privacidad | Revisar el almacenamiento y tratamiento de imágenes y documentos, así como los permisos y posibles transmisiones de información. | Los datos se manejan conforme a las condiciones de privacidad definidas para la aplicación. | Pendiente |
+| CP-32 | RNF-09 - Integridad | Verificar la relación entre lotes y documentos al registrar, modificar o eliminar información. | No se generan asociaciones inconsistentes ni pérdida accidental de documentos. | Pendiente |
 
 ## 5. Registro de ejecución
 
@@ -106,19 +116,23 @@ Esta relación representa la trazabilidad documental. La ejecución y aprobació
 
 | Requisito | Caso de prueba asociado | Estado |
 |---|---|---|
+| RNF-01 - Usabilidad | CP-27 | Pendiente |
 | RNF-02 - Desempeño | CP-25 | Pendiente |
 | RNF-03 - Funcionamiento sin conexión | CP-23 | Pendiente |
 | RNF-04 - Persistencia | CP-24 | Pendiente |
+| RNF-05 - Confiabilidad | CP-28 | Pendiente |
+| RNF-06 - Compatibilidad Android | CP-29 | Pendiente |
+| RNF-07 - Mantenibilidad | CP-30 | Pendiente |
+| RNF-08 - Privacidad | CP-31 | Pendiente |
+| RNF-09 - Integridad | CP-32 | Pendiente |
 | RNF-10 - Legibilidad de exportación | CP-26 | Pendiente |
-
-Los requisitos no funcionales RNF-01, RNF-05, RNF-06, RNF-07, RNF-08 y RNF-09 requieren casos de prueba específicos para verificar su cumplimiento.
 
 ### 9.2. Resultado de la revisión de trazabilidad
 
 - Requisitos funcionales relacionados: 18 de 18.
 - Criterios de aceptación relacionados: 18 de 18.
-- Casos de prueba funcionales asociados: 22 de 22.
-- Requisitos no funcionales con casos asociados: 4 de 10.
-- Requisitos no funcionales pendientes de asociación: 6 de 10.
+- Casos de prueba funcionales asociados: 22.
+- Requisitos no funcionales con casos asociados: 10 de 10.
+- Requisitos no funcionales pendientes de asociación: 0.
 
 La trazabilidad documental de los requisitos funcionales está establecida. Sin embargo, la verificación de cumplimiento permanece pendiente hasta ejecutar los casos de prueba y registrar sus evidencias.
