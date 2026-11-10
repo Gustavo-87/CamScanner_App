@@ -5,18 +5,42 @@
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
-    <Color x:Key="Primary">#512BD4</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
-    <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#DFD8F7</Color>
-    <Color x:Key="SecondaryDarkText">#9880e5</Color>
-    <Color x:Key="Tertiary">#2B0B98</Color>
+    <!-- Paleta del logo -->
+    <Color x:Key="LogoOutline">#2B2550</Color>
+    <Color x:Key="LogoShadow">#3A3157</Color>
+    <Color x:Key="LogoSlate">#343A4F</Color>
+    <Color x:Key="LogoSlateDark">#262A38</Color>
+    <Color x:Key="LogoSlateLight">#4A5270</Color>
+    <Color x:Key="LogoSky">#66C4FF</Color>
+    <Color x:Key="LogoSkyDeep">#4FA5DE</Color>
+    <Color x:Key="LogoLavender">#A8B4FF</Color>
+    <Color x:Key="LogoCream">#FDFDE6</Color>
+    <Color x:Key="LogoCreamDark">#C9C9A0</Color>
+    <Color x:Key="LogoYellow">#FDFBC8</Color>
+    <Color x:Key="LogoMint">#A6F5A8</Color>
+    <Color x:Key="LogoPink">#FF9CCF</Color>
+    <Color x:Key="LogoCyan">#9EE4FF</Color>
+
+    <!-- Colores de la app -->
+    <Color x:Key="Primary">#343A4F</Color>
+    <Color x:Key="PrimaryDark">#66C4FF</Color>
+    <Color x:Key="PrimaryDarkText">#262A38</Color>
+    <Color x:Key="Secondary">#A8B4FF</Color>
+    <Color x:Key="SecondaryDarkText">#A8B4FF</Color>
+    <Color x:Key="Tertiary">#2B2550</Color>
+
+    <!-- Estados (las tres luces de la cámara) -->
+    <Color x:Key="Success">#A6F5A8</Color>
+    <Color x:Key="Danger">#FF9CCF</Color>
+    <Color x:Key="Info">#9EE4FF</Color>
+    <!-- Texto sobre los colores pastel (contraste) -->
+    <Color x:Key="OnStatus">#262A38</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
-    <Color x:Key="Magenta">#D600AA</Color>
-    <Color x:Key="MidnightBlue">#190649</Color>
-    <Color x:Key="OffBlack">#1f1f1f</Color>
+    <Color x:Key="Magenta">#FF9CCF</Color>
+    <Color x:Key="MidnightBlue">#2B2550</Color>
+    <Color x:Key="OffBlack">#262A38</Color>
 
     <Color x:Key="Gray100">#E1E1E1</Color>
     <Color x:Key="Gray200">#C8C8C8</Color>
@@ -30,6 +54,10 @@
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Success}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource Danger}"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource Info}"/>
+    <SolidColorBrush x:Key="OnStatusBrush" Color="{StaticResource OnStatus}"/>
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
 

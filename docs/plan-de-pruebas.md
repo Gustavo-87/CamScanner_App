@@ -1,19 +1,16 @@
 # Plan de pruebas — CamScanner
 
-## 1. Objetivo
-Definir casos para verificar captura/importación, OCR local, selección y corrección, gestión de lotes/documentos, SQLite y exportación Excel. Este documento diseña pruebas; no informa resultados ejecutados.
+**Proyecto:** CamScanner · Android · .NET 10 / .NET MAUI  
+**Etapa:** Seguimiento 1, 2 de noviembre de 2026  
+**Responsable de pruebas:** Javier Serna  
+**Documentación y calidad:** Richard Prado  
+**Especificación vigente:** [docs/especificacion.md](especificacion.md)
 
-## 2. Estado inicial
-Todos los casos están **Pendientes de ejecución**. La revisión estática identificó configuración MAUI, modelos `Lote` y `Documento`, creación de tablas SQLite, consulta de lotes e inserción/actualización de lotes. La pantalla principal sigue siendo la plantilla MAUI y la búsqueda realizada no encontró referencias a OCR, cámara, selección de archivos o Excel.
+## 1. Objetivo y alcance
 
-## 3. Técnicas
-- Partición de equivalencia: imágenes compatibles/no compatibles y datos válidos/no válidos.
-- Valores límite: tamaños, cantidades y longitudes de campos.
-- Pruebas de flujo: captura/importación, OCR, revisión, guardado y exportación.
-- Persistencia: cerrar y reabrir la aplicación.
-- Pruebas negativas: permisos denegados, imágenes sin texto y errores de almacenamiento/exportación.
+Verificar incrementalmente la digitalización de documentos: captura/importación de imágenes, OCR local, selección y corrección del texto, gestión de lotes y documentos con SQLite y exportación individual o por lote a Excel.
 
-## 4. Casos de prueba
+Este documento distingue **casos diseñados**, **pruebas automatizadas aportadas** y **ejecuciones reportadas**. Una función planeada no se considera implementada ni verificada por el hecho de estar documentada. El alcance del proyecto **no incluye exportación ZIP/PDF**.
 
 | ID | Requisito | Escenario | Resultado esperado | Estado |
 |---|---|---|---|---|

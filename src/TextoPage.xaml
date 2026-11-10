@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CamScanner.TextoPage"
+             Title="Texto reconocido"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="16" RowSpacing="12">
+
+        <Label x:Name="NombreLabel" Grid.Row="0" FontSize="14"
+               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+               LineBreakMode="TailTruncation" />
+
+        <!-- Editor: se puede seleccionar, corregir y copiar el texto -->
+        <Border Grid.Row="1" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="12"
+                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+            <Editor x:Name="TextoEditor" Placeholder="No hay texto"
+                    BackgroundColor="Transparent" FontSize="16"
+                    TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}"
+                    VerticalOptions="Fill" />
+        </Border>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Button Grid.Column="0" Text="Copiar" CornerRadius="24" HeightRequest="48"
+                    BackgroundColor="{StaticResource Info}"
+                    TextColor="{StaticResource OnStatus}"
+                    Clicked="OnCopiarClicked" />
+            <Button Grid.Column="1" Text="Guardar" CornerRadius="24" HeightRequest="48"
+                    BackgroundColor="{StaticResource Success}"
+                    TextColor="{StaticResource OnStatus}"
+                    Clicked="OnGuardarClicked" />
+        </Grid>
+
+    </Grid>
+</ContentPage>

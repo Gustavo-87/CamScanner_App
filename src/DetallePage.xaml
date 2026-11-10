@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CamScanner.DetallePage"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="Black">
+
+    <ContentPage.Resources>
+        <!-- Círculo del icono de cada acción -->
+        <Style x:Key="AccionIcono" TargetType="Border">
+            <Setter Property="WidthRequest" Value="44" />
+            <Setter Property="HeightRequest" Value="44" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 22" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="AccionEmoji" TargetType="Label">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="AccionTexto" TargetType="Label">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="LineBreakMode" Value="NoWrap" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- ============ IMAGEN A PANTALLA COMPLETA ============ -->
+        <Image x:Name="Imagen" Grid.Row="0" Aspect="AspectFit"
+               SemanticProperties.Description="Imagen del documento" />
+
+        <!-- ============ BARRA SUPERIOR (atrás + nombre) ============ -->
+        <Grid Grid.Row="0" VerticalOptions="Start"
+              ColumnDefinitions="Auto,*" Padding="4,4,16,4"
+              BackgroundColor="#99000000">
+            <Button Text="←" FontSize="26" Padding="0"
+                    WidthRequest="48" HeightRequest="48" CornerRadius="24"
+                    BackgroundColor="Transparent" TextColor="White"
+                    SemanticProperties.Description="Volver"
+                    Clicked="OnAtrasClicked" />
+            <Label x:Name="TituloLabel" Grid.Column="1" VerticalOptions="Center"
+                   FontSize="18" FontAttributes="Bold" TextColor="White"
+                   LineBreakMode="TailTruncation" />
+        </Grid>
+
+        <!-- ============ BARRA INFERIOR DE ACCIONES ============ -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*" Padding="4,12,4,16"
+              BackgroundColor="{StaticResource LogoSlateDark}">
+
+            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnTextoTapped" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource Info}">
+                    <Label Text="🔍" Style="{StaticResource AccionEmoji}" />
+                </Border>
+                <Label Text="Texto" Style="{StaticResource AccionTexto}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnExcelTapped" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource Success}">
+                    <Label Text="📊" Style="{StaticResource AccionEmoji}" />
+                </Border>
+                <Label Text="Excel" Style="{StaticResource AccionTexto}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="2" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCompartirTapped" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource LogoLavender}">
+                    <Label Text="📤" Style="{StaticResource AccionEmoji}" />
+                </Border>
+                <Label Text="Compartir" Style="{StaticResource AccionTexto}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="3" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnRenombrarTapped" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource LogoYellow}">
+                    <Label Text="🏷️" Style="{StaticResource AccionEmoji}" />
+                </Border>
+                <Label Text="Renombrar" Style="{StaticResource AccionTexto}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="4" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnEliminarTapped" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource Danger}">
+                    <Label Text="🗑️" Style="{StaticResource AccionEmoji}" />
+                </Border>
+                <Label Text="Eliminar" Style="{StaticResource AccionTexto}" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- ============ INDICADOR DE PROGRESO DISCRETO ============
+             Flota sobre la imagen sin taparla ni bloquear los toques mientras trabaja. -->
+        <Border x:Name="ProgresoPill" Grid.Row="0"
+                VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,16"
+                Padding="14,8" StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                BackgroundColor="#E6262A38" IsVisible="False" InputTransparent="True">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnProgresoTapped" />
+            </Border.GestureRecognizers>
+            <HorizontalStackLayout Spacing="10">
+                <ActivityIndicator x:Name="Spinner" WidthRequest="20" HeightRequest="20"
+                                   Color="{StaticResource Info}" IsRunning="False" IsVisible="False" />
+                <Label x:Name="ProgresoTexto" FontSize="13" TextColor="White" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Border>
+
+    </Grid>
+</ContentPage>
