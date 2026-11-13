@@ -8,10 +8,16 @@
 
     <Grid RowDefinitions="Auto,*" Padding="8">
 
-        <Label Text="{Binding Resumen}"
-               FontSize="13"
-               TextColor="Gray"
-               Margin="8,4,8,8" />
+        <VerticalStackLayout Grid.Row="0" Spacing="6">
+            <Label Text="{Binding Resumen}"
+                   FontSize="13"
+                   TextColor="Gray"
+                   Margin="8,4,8,8" />
+
+            <Button Text="Exportar lote a Excel"
+                    Clicked="OnExportarExcelClicked"
+                    Margin="8,0,8,8" />
+        </VerticalStackLayout>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding Fotos}">
             <CollectionView.ItemsLayout>
