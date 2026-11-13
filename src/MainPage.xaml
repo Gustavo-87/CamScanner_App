@@ -1,17 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:CamScanner"
              xmlns:models="clr-namespace:CamScanner.Models"
              x:Class="CamScanner.MainPage"
              x:Name="Root"
              Title="CamScanner"
              BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
-
     <ContentPage.Resources>
         <!-- Anula el estilo global de BoxView (Gray200), que dejaba un bloque gris detrás de su Color -->
         <Style TargetType="BoxView">
             <Setter Property="BackgroundColor" Value="Transparent" />
         </Style>
+
+        <Style x:Key="Miniatura" TargetType="Border">
+            <Setter Property="WidthRequest" Value="60" />
+            <Setter Property="HeightRequest" Value="60" />
+            <Setter Property="HorizontalOptions" Value="Start" />
+            <Setter Property="VerticalOptions" Value="Start" />
+            <Setter Property="StrokeThickness" Value="2" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+            <!-- El borde del color de la tarjeta separa visualmente las fotos apiladas -->
+            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+        </Style>
+        
+        
 
         <!-- Círculo del icono en cada opción del menú -->
         <Style x:Key="MenuIcon" TargetType="Border">
@@ -44,85 +57,86 @@
     <Grid>
 
         <!-- Contenido principal con padding (el menú inferior queda fuera para cubrir toda la pantalla) -->
+        <!-- Contenido principal -->
         <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
 
-            <!-- ============ LISTA DE LOTES ============ -->
-            <VerticalStackLayout Grid.Row="0" Spacing="6">
-                <Label Text="Mis lotes" FontSize="18" FontAttributes="Bold"
-                       TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
-                <CollectionView x:Name="LotesView" ItemsSource="{Binding Lotes}" HeightRequest="82"
-                                SelectionMode="Single" SelectionChanged="OnLoteSeleccionado">
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.EmptyView>
-                        <Label Text="Aún no hay lotes" VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
-                    </CollectionView.EmptyView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:Lote">
-                            <Border WidthRequest="180" Padding="12" StrokeThickness="0"
-                                    StrokeShape="RoundRectangle 12"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                                    <Label Text="{Binding Nombre}" FontAttributes="Bold" LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
-                                    <Label Text="{Binding FechaCreacion, StringFormat='{0:dd MMM yyyy}'}" FontSize="12"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
-                                </VerticalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </VerticalStackLayout>
+            <!-- ============ TÍTULO ============ -->
+            <Label Grid.Row="0" Text="Mis lotes" FontSize="22" FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
 
-            <!-- ============ LISTA DE DOCUMENTOS ============ -->
-            <CollectionView Grid.Row="1" ItemsSource="{Binding Documentos}" SelectionMode="None">
+            <!-- ============ LISTA DE LOTES (carpetas) ============ -->
+            <CollectionView x:Name="LotesView" Grid.Row="1" ItemsSource="{Binding LotesVista}"
+                            SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                </CollectionView.ItemsLayout>
+
                 <CollectionView.EmptyView>
                     <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8" Padding="40">
-                        <Label Text="📄" FontSize="64" HorizontalOptions="Center" />
-                        <Label Text="Aún no hay documentos"
-                           FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
-                        <Label Text="Toca + para tomar una foto o importar una imagen"
-                           HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                        <Label Text="📁" FontSize="64" HorizontalOptions="Center" />
+                        <Label Text="Aún no hay lotes"
+                               FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+                        <Label Text="Toca + para crear un lote y empezar a agregar fotos"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Documento">
-                        <Border Margin="0,6" Padding="10" StrokeThickness="0"
-                            StrokeShape="RoundRectangle 16"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
+                    <DataTemplate x:DataType="local:LoteCard">
+                        <Border HeightRequest="110" Padding="12" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnDocumentoTapped" />
+                                <TapGestureRecognizer Tapped="OnLoteTapped" />
                             </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="56,*,44" ColumnSpacing="12">
-                                <Border WidthRequest="56" HeightRequest="56" StrokeThickness="0"
-                                    StrokeShape="RoundRectangle 10">
-                                    <Image Source="{Binding RutaImagen}" Aspect="AspectFill" />
-                                </Border>
 
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                    <Label Text="{Binding Nombre}" FontSize="16" FontAttributes="Bold" LineBreakMode="TailTruncation"
-                                       TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
-                                    <Label Text="{Binding FechaCreacion, StringFormat='{0:dd MMM yyyy, HH:mm}'}" FontSize="12"
-                                       TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                            <Grid ColumnDefinitions="*,96" ColumnSpacing="8">
+
+                                <!-- Datos del lote -->
+                                <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="{Binding Nombre}" FontAttributes="Bold" FontSize="16"
+                                               LineBreakMode="TailTruncation" VerticalOptions="Center"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+                                        <Button Grid.Column="1" Text="⋮" FontSize="20" Padding="0"
+                                                WidthRequest="32" HeightRequest="32" CornerRadius="16"
+                                                BackgroundColor="Transparent"
+                                                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}"
+                                                Clicked="OnMenuLoteClicked" />
+                                    </Grid>
+                                    <Label Text="{Binding FechaCreacion, StringFormat='{0:dd MMM yyyy}'}" FontSize="12"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                                    <Label Text="{Binding Cantidad}" FontSize="12" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
                                 </VerticalStackLayout>
 
-                                <!-- Botón ⋮ : abre el menú contextual del documento -->
-                                <Button Grid.Column="2" Text="⋮" FontSize="24" Padding="0"
-                                    WidthRequest="44" HeightRequest="44" CornerRadius="22"
-                                    BackgroundColor="Transparent"
-                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}"
-                                    Clicked="OnMenuDocumentoClicked" />
+                                <!-- Vista previa en escalera -->
+                                <Grid Grid.Column="1" WidthRequest="92" HeightRequest="84"
+                                      HorizontalOptions="End" VerticalOptions="Center">
+                                    <Border Style="{StaticResource Miniatura}" Margin="0,0,0,0"
+                                            IsVisible="{Binding HayFoto1}">
+                                        <Image Source="{Binding Foto1}" Aspect="AspectFill" />
+                                    </Border>
+                                    <Border Style="{StaticResource Miniatura}" Margin="16,12,0,0"
+                                            IsVisible="{Binding HayFoto2}">
+                                        <Image Source="{Binding Foto2}" Aspect="AspectFill" />
+                                    </Border>
+                                    <Border Style="{StaticResource Miniatura}" Margin="32,24,0,0"
+                                            IsVisible="{Binding HayFoto3}">
+                                        <Image Source="{Binding Foto3}" Aspect="AspectFill" />
+                                    </Border>
+
+                                    <Label Text="📁" FontSize="44" IsVisible="{Binding Vacio}"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Grid>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
 
-                <!-- Espacio para que el botón + no tape el último elemento -->
+                <!-- Espacio para que el botón + no tape el último lote -->
                 <CollectionView.Footer>
                     <BoxView HeightRequest="96" Color="Transparent" />
                 </CollectionView.Footer>
@@ -130,19 +144,18 @@
 
             <!-- ============ BOTÓN FLOTANTE (+) ============ -->
             <Button x:Name="Fab" Grid.Row="1" Text="+" FontSize="32" Padding="0,0,0,4"
-                WidthRequest="60" HeightRequest="60" CornerRadius="30"
-                HorizontalOptions="End" VerticalOptions="End"
-                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
-                SemanticProperties.Description="Agregar documento"
-                Clicked="OnFabClicked">
+                    WidthRequest="60" HeightRequest="60" CornerRadius="30"
+                    HorizontalOptions="End" VerticalOptions="End"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
+                    SemanticProperties.Description="Agregar"
+                    Clicked="OnFabClicked">
                 <Button.Shadow>
                     <Shadow Brush="Black" Opacity="0.3" Radius="8" Offset="0,4" />
                 </Button.Shadow>
             </Button>
 
         </Grid>
-
         <!-- ============ MENÚ INFERIOR (BOTTOM SHEET) ============ -->
         <Grid x:Name="Overlay" IsVisible="False">
             <!-- Fondo oscuro: al tocarlo se cierra el menú -->

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:CamScanner"
+             xmlns:models="clr-namespace:CamScanner.Models"
+             x:Class="CamScanner.LotePage"
+             x:DataType="local:LotePage">
+
+    <Grid RowDefinitions="Auto,*" Padding="8">
+
+        <Label Text="{Binding Resumen}"
+               FontSize="13"
+               TextColor="Gray"
+               Margin="8,4,8,8" />
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Fotos}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="3" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.EmptyView>
+                <Label Text="Este lote aún no tiene fotos"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       TextColor="Gray" />
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Documento">
+                    <Border Margin="4" Padding="0" StrokeThickness="0"
+                            StrokeShape="RoundRectangle 8">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnFotoTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid RowDefinitions="120,Auto">
+                            <Image Source="{Binding RutaImagen}" Aspect="AspectFill" />
+                            <Label Grid.Row="1"
+                                   Text="{Binding Nombre}"
+                                   FontSize="12"
+                                   LineBreakMode="TailTruncation"
+                                   Margin="6,4" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

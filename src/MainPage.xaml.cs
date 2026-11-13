@@ -9,6 +9,11 @@ public partial class MainPage : ContentPage
     public ObservableCollection<Documento> Documentos { get; } = new();
     public ObservableCollection<Lote> Lotes { get; } = new();
 
+    public ObservableCollection<LoteCard> LotesVista { get; } = new();
+    private bool _cargando;
+
+
+
     private readonly CamScannerDatabase _database;
 
     private Documento? _seleccionado;
@@ -16,6 +21,8 @@ public partial class MainPage : ContentPage
     public MainPage(CamScannerDatabase database)
     {
         InitializeComponent();
+        Lotes.CollectionChanged += (_, _) => ReconstruirLotesVista();
+        Documentos.CollectionChanged += (_, _) => ReconstruirLotesVista();
         _database = database;
         BindingContext = this;
         Loaded += OnLoaded;
@@ -23,6 +30,7 @@ public partial class MainPage : ContentPage
 
     private async void OnLoaded(object? sender, EventArgs e)
     {
+        _cargando = true; // evita reconstruir la vista por cada elemento agregado
         try
         {
             var lotes = await _database.ObtenerLotesAsync();
@@ -41,7 +49,100 @@ public partial class MainPage : ContentPage
         {
             await DisplayAlertAsync("Error", $"No se pudieron cargar los lotes: {ex.Message}", "OK");
         }
+        finally
+        {
+            _cargando = false;
+            ReconstruirLotesVista();
+        }
     }
+
+
+
+    private void ReconstruirLotesVista()
+    {
+        if (_cargando)
+            return;
+
+        LotesVista.Clear();
+        foreach (var lote in Lotes)
+        {
+            var docs = Documentos.Where(d => d.LoteId == lote.Id).ToList();
+            LotesVista.Add(new LoteCard(lote, docs));
+        }
+    }
+
+    // Tocar el lote = entrar a la "carpeta"
+    private async void OnLoteTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is BindableObject { BindingContext: LoteCard card })
+            await Navigation.PushAsync(new LotePage(card.Lote, Documentos, doc => AbrirDetalleAsync(doc)));
+    }
+
+    // Botón ⋮ de la tarjeta
+    private async void OnMenuLoteClicked(object? sender, EventArgs e)
+    {
+        if (sender is BindableObject { BindingContext: LoteCard card })
+            await MostrarOpcionesLoteAsync(card.Lote);
+    }
+
+    private async Task MostrarOpcionesLoteAsync(Lote lote)
+    {
+        var accion = await DisplayActionSheetAsync(lote.Nombre, "Cancelar", null, "Editar", "Eliminar");
+
+        if (accion == "Editar")
+        {
+            var nombre = await DisplayPromptAsync(
+                "Editar lote",
+                "Nombre del lote:",
+                accept: "Guardar",
+                cancel: "Cancelar",
+                initialValue: lote.Nombre);
+
+            if (string.IsNullOrWhiteSpace(nombre))
+                return;
+
+            try
+            {
+                lote.Nombre = nombre.Trim();
+                await _database.GuardarLoteAsync(lote);
+                RefrescarLote(lote);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Error", $"No se pudo actualizar el lote: {ex.Message}", "OK");
+            }
+        }
+        else if (accion == "Eliminar")
+        {
+            var confirmar = await DisplayAlertAsync(
+                "Eliminar lote",
+                $"¿Eliminar \"{lote.Nombre}\"?",
+                "Eliminar",
+                "Cancelar");
+
+            if (!confirmar)
+                return;
+
+            try
+            {
+                if (!await _database.EliminarLoteAsync(lote))
+                {
+                    await DisplayAlertAsync(
+                        "No se puede eliminar",
+                        "El lote tiene documentos asociados. Elimínalos o reasígnalos primero.",
+                        "OK");
+                    return;
+                }
+
+                Lotes.Remove(lote);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Error", $"No se pudo eliminar el lote: {ex.Message}", "OK");
+            }
+        }
+    }
+
 
     // ================= Hoja inferior (bottom sheet) =================
 
@@ -203,7 +304,16 @@ public partial class MainPage : ContentPage
 
         LotesView.SelectedItem = null;
 
+
+
         var accion = await DisplayActionSheetAsync(lote.Nombre, "Cancelar", null, "Editar", "Eliminar");
+
+        if (accion == "Ver fotos")
+        {
+            await Navigation.PushAsync(new LotePage(lote, Documentos, doc => AbrirDetalleAsync(doc)));
+        }
+
+
         if (accion == "Editar")
         {
             var nombre = await DisplayPromptAsync(
@@ -313,7 +423,10 @@ public partial class MainPage : ContentPage
     private async void OnVerEditarTapped(object? sender, TappedEventArgs e)
     {
         await OcultarHojaAsync();
-        await DisplayAlertAsync("Próximamente", "Aquí se mostrará el texto reconocido por OCR para editarlo.", "OK");
+        if (_seleccionado is null)
+            return;
+
+        await AbrirDetalleAsync(_seleccionado, iniciarOcr: true);
     }
 
     private async void OnExportarExcelTapped(object? sender, TappedEventArgs e)
@@ -362,9 +475,9 @@ public partial class MainPage : ContentPage
             await AbrirDetalleAsync(doc);
     }
 
-    private async Task AbrirDetalleAsync(Documento doc)
+    private async Task AbrirDetalleAsync(Documento doc, bool iniciarOcr = false)
     {
-        var pagina = new DetallePage(doc);
+        var pagina = new DetallePage(doc) { IniciarOcrAlAbrir = iniciarOcr };
         pagina.Actualizado += documento => _ = ActualizarDocumentoAsync(documento);
         pagina.Eliminado += documento => _ = EliminarDocumentoAsync(documento);
         await Navigation.PushAsync(pagina);

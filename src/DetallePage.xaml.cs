@@ -1,24 +1,35 @@
 using CamScanner.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CamScanner;
+
+/// <summary>El OCR no está registrado o la plataforma no lo soporta (único caso en que se avisa "no disponible").</summary>
+public sealed class OcrNoDisponibleException : Exception
+{
+    public OcrNoDisponibleException(string mensaje, Exception? inner = null) : base(mensaje, inner) { }
+}
 
 public partial class DetallePage : ContentPage
 {
     private readonly Documento _doc;
-    private readonly IOcrService _ocrService; // Instancia de abstracción de servicio nativo avanzado
+    private readonly IOcrService? _ocrService;
+
+    // El motor se inicializa una sola vez por sesión, no en cada toque
+    private static readonly SemaphoreSlim _initLock = new(1, 1);
+    private static bool _ocrInicializado;
 
     private bool _ocrEnCurso;
     private bool _avisoAbreEditor;
+    private bool _ocrAutoLanzado;
     private int _avisoId;
 
-    /// <summary>Se dispara después de cambiar datos del documento.</summary>
-    public event Action<Documento>? Actualizado;
+    /// <summary>Si es true, al abrir la página se lanza el OCR (o el editor si ya hay texto).</summary>
+    public bool IniciarOcrAlAbrir { get; init; }
 
-    /// <summary>Se dispara cuando el usuario confirma eliminar; quien lo recibe borra archivo y registro.</summary>
+    public event Action<Documento>? Actualizado;
     public event Action<Documento>? Eliminado;
 
-    // Constructor óptimo utilizando el contenedor de inyección de dependencias de .NET MAUI
-    public DetallePage(Documento doc, IOcrService ocrService)
+    public DetallePage(Documento doc, IOcrService? ocrService)
     {
         InitializeComponent();
         _doc = doc;
@@ -27,19 +38,33 @@ public partial class DetallePage : ContentPage
         Imagen.Source = ImageSource.FromFile(doc.RutaImagen);
     }
 
-    /// <summary>Constructor secundario por si se instancia manualmente sin pasar por el contenedor de dependencias.</summary>
-    public DetallePage(Documento doc) : this(doc, App.Current?.Handler?.MauiContext?.Services.GetService<IOcrService>()!)
+    public DetallePage(Documento doc) : this(doc, ResolverOcr()) { }
+
+    private static IOcrService? ResolverOcr() =>
+        IPlatformApplication.Current?.Services.GetService<IOcrService>()
+        ?? Application.Current?.Handler?.MauiContext?.Services.GetService<IOcrService>();
+
+    protected override void OnAppearing()
     {
+        base.OnAppearing();
+
+        if (IniciarOcrAlAbrir && !_ocrAutoLanzado)
+        {
+            _ocrAutoLanzado = true;
+            _ = IniciarOcrAsync();
+        }
     }
 
     private async void OnAtrasClicked(object? sender, EventArgs e) => await Navigation.PopAsync();
 
-    // ================= OCR MEJORADO =================
+    // ================= OCR =================
 
-    private async void OnTextoTapped(object? sender, TappedEventArgs e)
+    private async void OnTextoTapped(object? sender, TappedEventArgs e) => await IniciarOcrAsync();
+
+    private async Task IniciarOcrAsync()
     {
         if (_ocrEnCurso)
-            return; // ya está reconociendo; el indicador lo muestra
+            return;
 
         // Si ya hay texto guardado, se abre directo el editor
         if (!string.IsNullOrWhiteSpace(_doc.TextoExtraido))
@@ -48,8 +73,41 @@ public partial class DetallePage : ContentPage
             return;
         }
 
-        // Sin await: el OCR corre en segundo plano y el usuario sigue viendo la imagen
         _ = ReconocerTextoAsync();
+    }
+
+    /// <summary>Devuelve el servicio listo para usar o lanza OcrNoDisponibleException.</summary>
+    private async Task<IOcrService> ObtenerOcrListoAsync()
+    {
+        var ocr = _ocrService
+            ?? throw new OcrNoDisponibleException("IOcrService no está registrado en MauiProgram.");
+
+        if (_ocrInicializado)
+            return ocr;
+
+        await _initLock.WaitAsync();
+        try
+        {
+            if (!_ocrInicializado)
+            {
+                try
+                {
+                    await ocr.InitAsync();
+                }
+                catch (Exception ex) when (ex is NotSupportedException or FeatureNotSupportedException)
+                {
+                    throw new OcrNoDisponibleException("La plataforma no soporta OCR.", ex);
+                }
+
+                _ocrInicializado = true; // si InitAsync falla, no se marca y se reintenta
+            }
+        }
+        finally
+        {
+            _initLock.Release();
+        }
+
+        return ocr;
     }
 
     private async Task ReconocerTextoAsync()
@@ -57,33 +115,57 @@ public partial class DetallePage : ContentPage
         _ocrEnCurso = true;
         MostrarProgreso("Reconociendo texto…");
 
+        string? texto = null;
+        string? error = null;
+
         try
         {
-            // Inicializa el motor nativo de la plataforma correspondiente (iOS/Android)
-            await _ocrService.InitAsync();
+            if (!File.Exists(_doc.RutaImagen))
+                throw new FileNotFoundException("La imagen no existe.", _doc.RutaImagen);
 
-            // Pasamos la ruta del archivo de forma directa. Ahorramos lecturas innecesarias en bytes
-            var textoDetectado = await _ocrService.RecognizeTextAsync(_doc.RutaImagen);
-
-            if (string.IsNullOrWhiteSpace(textoDetectado))
-            {
-                await MostrarAvisoAsync("No se detectó texto", abreEditor: false);
-                return;
-            }
-
-            // TODO: al integrar SQLite, persistir TextoExtraido (UpdateAsync)
-            _doc.TextoExtraido = textoDetectado;
-            await MostrarAvisoAsync("Texto listo · Toca para ver", abreEditor: true);
+            var ocr = await ObtenerOcrListoAsync();
+            texto = await ocr.RecognizeTextAsync(_doc.RutaImagen);
+        }
+        catch (OcrNoDisponibleException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"OCR no disponible: {ex}");
+            error = "El OCR no está disponible en este dispositivo";
+        }
+        catch (FileNotFoundException)
+        {
+            error = "La imagen ya no existe en el dispositivo";
+        }
+        catch (OperationCanceledException)
+        {
+            OcultarProgreso();
+            return;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error de OCR Nativo: {ex}");
-            await MostrarAvisoAsync("No se pudo reconocer el texto", abreEditor: false);
+            // Fallo real y temporal: NO se dice "no disponible"
+            System.Diagnostics.Debug.WriteLine($"Error de OCR: {ex}");
+            error = "No se pudo reconocer el texto. Inténtalo de nuevo";
         }
         finally
         {
-            _ocrEnCurso = false;
+            _ocrEnCurso = false; // se libera antes del aviso para poder reintentar
         }
+
+        if (error is not null)
+        {
+            await MostrarAvisoAsync(error, abreEditor: false);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(texto))
+        {
+            await MostrarAvisoAsync("No se detectó texto", abreEditor: false);
+            return;
+        }
+
+        _doc.TextoExtraido = texto;
+        Actualizado?.Invoke(_doc); // MainPage lo persiste en SQLite (resuelve el TODO)
+        await MostrarAvisoAsync("Texto listo · Toca para ver", abreEditor: true);
     }
 
     private async Task AbrirEditorAsync()

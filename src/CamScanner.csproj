@@ -63,6 +63,9 @@
 		<Compile Update="DetallePage.xaml.cs">
 			<DependentUpon>DetallePage.xaml</DependentUpon>
 		</Compile>
+		<Compile Update="LotePage.xaml.cs">
+		  <DependentUpon>LotePage.xaml</DependentUpon>
+		</Compile>
 		<Compile Update="TextoPage.xaml.cs">
 			<DependentUpon>TextoPage.xaml</DependentUpon>
 		</Compile>
@@ -71,6 +74,9 @@
 	<ItemGroup>
 		<MauiXaml Update="DetallePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="LotePage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="TextoPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
