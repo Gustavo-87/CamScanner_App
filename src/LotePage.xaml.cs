@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using CamScanner.Models;
+using CamScanner.Services;
 
 namespace CamScanner;
 
@@ -66,5 +67,44 @@ public partial class LotePage : ContentPage
     {
         if (sender is BindableObject { BindingContext: Documento doc })
             await _abrirDetalle(doc);
+    }
+
+    private async void OnExportarExcelClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (Fotos.Count == 0)
+            {
+                await DisplayAlertAsync(
+                    "Sin documentos",
+                    "Este lote no tiene documentos para exportar.",
+                    "OK");
+                return;
+            }
+
+            var servicio = new ExcelExportService();
+            var contenido = servicio.ExportarLote(_lote, Fotos.ToList());
+
+            var ruta = Path.Combine(
+                FileSystem.CacheDirectory,
+                $"CamScanner_Lote_{_lote.Id}_{Guid.NewGuid():N}.xlsx");
+
+            await File.WriteAllBytesAsync(ruta, contenido);
+
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = $"Exportar lote {_lote.Nombre}",
+                File = new ShareFile(
+                    ruta,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync(
+                "Error al exportar",
+                $"No se pudo exportar el lote: {ex.Message}",
+                "OK");
+        }
     }
 }

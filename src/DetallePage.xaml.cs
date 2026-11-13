@@ -1,5 +1,7 @@
 using CamScanner.Models;
 using Microsoft.Extensions.DependencyInjection;
+using CamScanner.Data;
+using CamScanner.Services;
 
 namespace CamScanner;
 
@@ -22,6 +24,11 @@ public partial class DetallePage : ContentPage
     private bool _avisoAbreEditor;
     private bool _ocrAutoLanzado;
     private int _avisoId;
+    private readonly CamScannerDatabase _database =
+        IPlatformApplication.Current!.Services
+              .GetRequiredService<CamScannerDatabase>();
+
+    private readonly ExcelExportService _excelExportService = new();
 
     /// <summary>Si es true, al abrir la página se lanza el OCR (o el editor si ya hay texto).</summary>
     public bool IniciarOcrAlAbrir { get; init; }
@@ -227,8 +234,37 @@ public partial class DetallePage : ContentPage
 
     private async void OnExcelTapped(object? sender, TappedEventArgs e)
     {
-        // TODO: exportar la información del documento a Excel
-        await DisplayAlertAsync("Próximamente", "Aquí se exportará la información del documento a Excel.", "OK");
+        try
+        {
+            var lotes = await _database.ObtenerLotesAsync();
+            var lote = lotes.FirstOrDefault(l => l.Id == _doc.LoteId);
+
+            if (lote is null)
+            {
+                await DisplayAlertAsync("Error",
+                    "No se encontró el lote asociado al documento.", "OK");
+                return;
+            }
+
+            var contenido = _excelExportService.ExportarDocumento(_doc, lote.Nombre);
+            var nombreArchivo = $"CamScanner_{_doc.Id}_{Guid.NewGuid():N}.xlsx";
+            var ruta = Path.Combine(FileSystem.CacheDirectory, nombreArchivo);
+
+            await File.WriteAllBytesAsync(ruta, contenido);
+
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "Exportar documento a Excel",
+                File = new ShareFile(
+                    ruta,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al exportar",
+                $"No se pudo generar el archivo Excel: {ex.Message}", "OK");
+        }
     }
 
     private async void OnCompartirTapped(object? sender, TappedEventArgs e)
