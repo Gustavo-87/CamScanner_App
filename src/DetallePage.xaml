@@ -49,10 +49,12 @@
         </Grid>
 
         <!-- ============ BARRA INFERIOR DE ACCIONES ============ -->
-        <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*" Padding="4,12,4,16"
-              BackgroundColor="{StaticResource LogoSlateDark}">
+        <ScrollView Grid.Row="1" Orientation="Horizontal"
+                    HorizontalScrollBarVisibility="Always"
+                    BackgroundColor="{StaticResource LogoSlateDark}">
+            <HorizontalStackLayout Spacing="6" Padding="8,12,8,16">
 
-            <VerticalStackLayout Grid.Column="0" Spacing="4">
+            <VerticalStackLayout WidthRequest="72" Spacing="4">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnTextoTapped" />
                 </VerticalStackLayout.GestureRecognizers>
@@ -62,27 +64,47 @@
                 <Label Text="Texto" Style="{StaticResource AccionTexto}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Grid.Column="1" Spacing="4">
+            <VerticalStackLayout WidthRequest="112" Spacing="4">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnExcelTapped" />
                 </VerticalStackLayout.GestureRecognizers>
                 <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource Success}">
                     <Label Text="📊" Style="{StaticResource AccionEmoji}" />
                 </Border>
-                <Label Text="Excel" Style="{StaticResource AccionTexto}" />
+                <Label Text="Compartir Excel" Style="{StaticResource AccionTexto}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Grid.Column="2" Spacing="4">
+            <VerticalStackLayout WidthRequest="108" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnGuardarExcelTapped" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource Success}">
+                    <Label Text="📋" Style="{StaticResource AccionEmoji}" />
+                </Border>
+                    <Label Text="Guardar Excel" Style="{StaticResource AccionTexto}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout WidthRequest="124" Spacing="4">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnCompartirTapped" />
                 </VerticalStackLayout.GestureRecognizers>
                 <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource LogoLavender}">
                     <Label Text="📤" Style="{StaticResource AccionEmoji}" />
                 </Border>
-                <Label Text="Compartir" Style="{StaticResource AccionTexto}" />
+                    <Label Text="Compartir imagen" Style="{StaticResource AccionTexto}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Grid.Column="3" Spacing="4">
+            <VerticalStackLayout WidthRequest="118" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnGuardarFotoTapped" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Border Style="{StaticResource AccionIcono}" BackgroundColor="{StaticResource LogoLavender}">
+                    <Label Text="🖼️" Style="{StaticResource AccionEmoji}" />
+                </Border>
+                <Label Text="Guardar imagen" Style="{StaticResource AccionTexto}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout WidthRequest="90" Spacing="4">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnRenombrarTapped" />
                 </VerticalStackLayout.GestureRecognizers>
@@ -92,7 +114,7 @@
                 <Label Text="Renombrar" Style="{StaticResource AccionTexto}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Grid.Column="4" Spacing="4">
+            <VerticalStackLayout WidthRequest="72" Spacing="4">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnEliminarTapped" />
                 </VerticalStackLayout.GestureRecognizers>
@@ -101,7 +123,8 @@
                 </Border>
                 <Label Text="Eliminar" Style="{StaticResource AccionTexto}" />
             </VerticalStackLayout>
-        </Grid>
+            </HorizontalStackLayout>
+        </ScrollView>
 
         <!-- ============ INDICADOR DE PROGRESO DISCRETO ============
              Flota sobre la imagen sin taparla ni bloquear los toques mientras trabaja. -->

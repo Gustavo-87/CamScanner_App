@@ -14,9 +14,20 @@
                    TextColor="Gray"
                    Margin="8,4,8,8" />
 
-            <Button Text="Exportar lote a Excel"
-                    Clicked="OnExportarExcelClicked"
-                    Margin="8,0,8,8" />
+            <Label Text="{Binding Descripcion}"
+                   FontSize="14"
+                   TextColor="Gray"
+                   LineBreakMode="WordWrap"
+                   Margin="8,0,8,4" />
+
+            <HorizontalStackLayout Spacing="8" Margin="8,0,8,8">
+                <Button Text="Compartir lote a Excel"
+                        Clicked="OnExportarExcelClicked"
+                        HorizontalOptions="FillAndExpand" />
+                <Button Text="Guardar Excel"
+                        Clicked="OnGuardarExcelClicked"
+                        HorizontalOptions="FillAndExpand" />
+            </HorizontalStackLayout>
         </VerticalStackLayout>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding Fotos}">
@@ -37,14 +48,18 @@
                             StrokeShape="RoundRectangle 8">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnFotoTapped" />
+                            <DragGestureRecognizer DragStarting="OnFotoDragStarting" />
+                            <DropGestureRecognizer AllowDrop="True" Drop="OnFotoDropped" />
                         </Border.GestureRecognizers>
                         <Grid RowDefinitions="120,Auto">
                             <Image Source="{Binding RutaImagen}" Aspect="AspectFill" />
-                            <Label Grid.Row="1"
-                                   Text="{Binding Nombre}"
-                                   FontSize="12"
-                                   LineBreakMode="TailTruncation"
-                                   Margin="6,4" />
+                            <Grid Grid.Row="1">
+                                <Label Text="{Binding Nombre}"
+                                       FontSize="12"
+                                       LineBreakMode="TailTruncation"
+                                       VerticalOptions="Center"
+                                       Margin="6,4" />
+                            </Grid>
                         </Grid>
                     </Border>
                 </DataTemplate>

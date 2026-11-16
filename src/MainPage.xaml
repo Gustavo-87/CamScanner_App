@@ -54,15 +54,30 @@
         </Style>
     </ContentPage.Resources>
 
-    <Grid>
+    <Grid x:Name="MainRoot">
 
         <!-- Contenido principal con padding (el menú inferior queda fuera para cubrir toda la pantalla) -->
         <!-- Contenido principal -->
         <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
 
             <!-- ============ TÍTULO ============ -->
-            <Label Grid.Row="0" Text="Mis lotes" FontSize="22" FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+                <Label Text="Mis lotes" FontSize="22" FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+                <Button x:Name="ExportarLotesButton" Grid.Column="1"
+                        Text="Compartir" FontSize="12" Padding="10,4"
+                        IsVisible="False" Clicked="OnExportarLotesClicked" />
+                <Button x:Name="BaseDatosButton" Grid.Column="3"
+                        Text="BD" FontSize="12" Padding="10,4"
+                        IsVisible="False" Clicked="OnBaseDatosClicked" />
+                <Button x:Name="GuardarLotesButton" Grid.Column="2"
+                        Text="Guardar" FontSize="12" Padding="10,4"
+                        IsVisible="False" Clicked="OnGuardarLotesClicked" />
+                <Button x:Name="CancelarSeleccionButton" Grid.Column="4"
+                        Text="Salir" FontSize="12" Padding="10,4"
+                        IsVisible="False" Clicked="OnCancelarSeleccionClicked" />
+            </Grid>
 
             <!-- ============ LISTA DE LOTES (carpetas) ============ -->
             <CollectionView x:Name="LotesView" Grid.Row="1" ItemsSource="{Binding LotesVista}"
@@ -90,12 +105,17 @@
                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnLoteTapped" />
+                                <DragGestureRecognizer DragStarting="OnLoteDragStarting" />
                             </Border.GestureRecognizers>
 
-                            <Grid ColumnDefinitions="*,96" ColumnSpacing="8">
+                            <Grid ColumnDefinitions="Auto,*,96" ColumnSpacing="8">
+                                <CheckBox IsVisible="{Binding ModoSeleccion}"
+                                          IsChecked="{Binding Seleccionado, Mode=TwoWay}"
+                                          CheckedChanged="OnLoteSelectionChanged"
+                                          VerticalOptions="Center" />
 
                                 <!-- Datos del lote -->
-                                <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Text="{Binding Nombre}" FontAttributes="Bold" FontSize="16"
                                                LineBreakMode="TailTruncation" VerticalOptions="Center"
@@ -108,12 +128,15 @@
                                     </Grid>
                                     <Label Text="{Binding FechaCreacion, StringFormat='{0:dd MMM yyyy}'}" FontSize="12"
                                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                                    <Label Text="{Binding Descripcion}" FontSize="12"
+                                           LineBreakMode="TailTruncation" MaxLines="2"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
                                     <Label Text="{Binding Cantidad}" FontSize="12" FontAttributes="Bold"
                                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
                                 </VerticalStackLayout>
 
                                 <!-- Vista previa en escalera -->
-                                <Grid Grid.Column="1" WidthRequest="92" HeightRequest="84"
+                                <Grid Grid.Column="2" WidthRequest="92" HeightRequest="84"
                                       HorizontalOptions="End" VerticalOptions="Center">
                                     <Border Style="{StaticResource Miniatura}" Margin="0,0,0,0"
                                             IsVisible="{Binding HayFoto1}">
@@ -230,7 +253,7 @@
                         <Border Style="{StaticResource MenuIcon}" BackgroundColor="{StaticResource Success}">
                             <Label Text="📊" Style="{StaticResource MenuEmoji}" />
                         </Border>
-                        <Label Grid.Column="1" Text="Exportar a Excel" Style="{StaticResource MenuText}" />
+                        <Label Grid.Column="1" Text="Compartir a Excel" Style="{StaticResource MenuText}" />
                     </Grid>
 
                     <Grid ColumnDefinitions="48,*" ColumnSpacing="16" Padding="0,6">

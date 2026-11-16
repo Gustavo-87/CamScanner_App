@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CamScanner.Models;
 using CamScanner.Data;
+using CamScanner.Services;
 
 namespace CamScanner;
 
@@ -11,6 +12,13 @@ public partial class MainPage : ContentPage
 
     public ObservableCollection<LoteCard> LotesVista { get; } = new();
     private bool _cargando;
+    private bool _navegando;
+    private bool _exportandoLotes;
+    private bool _modoSeleccion;
+    private bool _vistaInicializada;
+    private bool _recargarAlVolver;
+    private int? _loteActivadoRecientemente;
+    private readonly HashSet<int> _lotesSeleccionados = new();
 
 
 
@@ -28,8 +36,222 @@ public partial class MainPage : ContentPage
         Loaded += OnLoaded;
     }
 
+    private async void OnLoteDragStarting(object? sender, DragStartingEventArgs e)
+    {
+        e.Cancel = true;
+
+        if (!_modoSeleccion && sender is BindableObject { BindingContext: LoteCard card })
+            await ActivarModoSeleccionAsync(card);
+
+    }
+
+    private async Task ActivarModoSeleccionAsync(LoteCard loteInicial)
+    {
+        _modoSeleccion = true;
+        _lotesSeleccionados.Clear();
+        _lotesSeleccionados.Add(loteInicial.Lote.Id);
+        _loteActivadoRecientemente = loteInicial.Lote.Id;
+        this.FindByName<Button>("ExportarLotesButton").IsVisible = EsPlataformaMovil();
+        this.FindByName<Button>("GuardarLotesButton").IsVisible = EsPlataformaMovil();
+        this.FindByName<Button>("BaseDatosButton").IsVisible = EsPlataformaMovil();
+        this.FindByName<Button>("CancelarSeleccionButton").IsVisible = true;
+
+        await Task.Delay(300);
+        ReconstruirLotesVista();
+
+        await Task.Delay(400);
+        if (_loteActivadoRecientemente == loteInicial.Lote.Id)
+            _loteActivadoRecientemente = null;
+    }
+
+    private void OnCancelarSeleccionClicked(object? sender, EventArgs e)
+    {
+        _lotesSeleccionados.Clear();
+        _modoSeleccion = false;
+        _loteActivadoRecientemente = null;
+        this.FindByName<Button>("ExportarLotesButton").IsVisible = false;
+        this.FindByName<Button>("GuardarLotesButton").IsVisible = false;
+        this.FindByName<Button>("BaseDatosButton").IsVisible = false;
+        this.FindByName<Button>("CancelarSeleccionButton").IsVisible = false;
+        ReconstruirLotesVista();
+    }
+
+    private async void OnGuardarLotesClicked(object? sender, EventArgs e)
+    {
+        if (_exportandoLotes)
+            return;
+
+        var lotesSeleccionados = Lotes
+            .Where(lote => _lotesSeleccionados.Contains(lote.Id))
+            .ToList();
+
+        if (lotesSeleccionados.Count == 0)
+        {
+            await DisplayAlertAsync("Selecciona lotes", "Marca al menos un lote para guardarlo.", "OK");
+            return;
+        }
+
+        _exportandoLotes = true;
+        try
+        {
+            var lotesConDocumentos = lotesSeleccionados
+                .Select(lote => (Lote: lote,
+                    Documentos: (IEnumerable<Documento>)Documentos
+                        .Where(documento => documento.LoteId == lote.Id)
+                        .OrderBy(documento => documento.Orden)
+                        .ToList()))
+                .Where(grupo => grupo.Documentos.Any())
+                .ToList();
+
+            if (lotesConDocumentos.Count == 0)
+            {
+                await DisplayAlertAsync("Sin documentos", "No hay documentos para guardar.", "OK");
+                return;
+            }
+
+            var contenido = new ExcelExportService().ExportarLotes(lotesConDocumentos);
+            var guardado = await ArchivoService.GuardarAsync(
+                contenido,
+                "CamScanner_Lotes.xlsx");
+
+            if (guardado)
+            {
+                _lotesSeleccionados.Clear();
+                ReconstruirLotesVista();
+                await DisplayAlertAsync("Guardado", "El archivo Excel se guardó correctamente.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al guardar", $"No se pudieron guardar los lotes: {ex.Message}", "OK");
+        }
+        finally
+        {
+            _exportandoLotes = false;
+        }
+    }
+
+    private static bool EsPlataformaMovil()
+    {
+#if ANDROID || IOS
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    private async void OnBaseDatosClicked(object? sender, EventArgs e)
+    {
+        _recargarAlVolver = true;
+        await Navigation.PushAsync(new DatabasePage());
+    }
+
+    private async void OnExportarLotesClicked(object? sender, EventArgs e)
+    {
+        if (_exportandoLotes)
+            return;
+
+        var lotesSeleccionados = Lotes
+            .Where(lote => _lotesSeleccionados.Contains(lote.Id))
+            .ToList();
+
+        if (lotesSeleccionados.Count == 0)
+        {
+            await DisplayAlertAsync("Selecciona lotes", "Marca al menos un lote para exportarlo.", "OK");
+            return;
+        }
+
+        _exportandoLotes = true;
+        try
+        {
+            var lotesConDocumentos = lotesSeleccionados
+                .Select(lote => (Lote: lote,
+                    Documentos: (IEnumerable<Documento>)Documentos
+                        .Where(documento => documento.LoteId == lote.Id)
+                        .OrderBy(documento => documento.Orden)
+                        .ToList()))
+                .Where(grupo => grupo.Documentos.Any())
+                .ToList();
+
+            if (lotesConDocumentos.Count == 0)
+            {
+                await DisplayAlertAsync("Sin documentos", "No hay documentos para exportar.", "OK");
+                return;
+            }
+
+            var contenido = new ExcelExportService().ExportarLotes(lotesConDocumentos);
+            var ruta = Path.Combine(
+                FileSystem.CacheDirectory,
+                $"CamScanner_Lotes_{Guid.NewGuid():N}.xlsx");
+
+            await File.WriteAllBytesAsync(ruta, contenido);
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "Exportar lotes a Excel",
+                File = new ShareFile(
+                    ruta,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            });
+            _lotesSeleccionados.Clear();
+            ReconstruirLotesVista();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al exportar", $"No se pudieron exportar los lotes: {ex.Message}", "OK");
+        }
+        finally
+        {
+            _exportandoLotes = false;
+        }
+    }
+
     private async void OnLoaded(object? sender, EventArgs e)
     {
+        await RecargarDatosAsync();
+        _vistaInicializada = true;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        LimpiarEstadoVisual();
+        RestaurarEstadoVisual();
+
+        if (_vistaInicializada && _recargarAlVolver && !_cargando)
+        {
+            _recargarAlVolver = false;
+            await RecargarDatosAsync();
+        }
+
+    }
+
+    protected override void OnDisappearing()
+    {
+        LimpiarEstadoVisual();
+        base.OnDisappearing();
+    }
+
+    private void LimpiarEstadoVisual()
+    {
+        _loteActivadoRecientemente = null;
+        Overlay.IsVisible = false;
+        AddSheet.IsVisible = false;
+        ItemSheet.IsVisible = false;
+    }
+
+    private void RestaurarEstadoVisual()
+    {
+        MainRoot.Opacity = 1;
+        LotesView.Opacity = 1;
+        Overlay.Opacity = 1;
+    }
+
+    private async Task RecargarDatosAsync()
+    {
+        if (_cargando)
+            return;
+
         _cargando = true; // evita reconstruir la vista por cada elemento agregado
         try
         {
@@ -67,15 +289,62 @@ public partial class MainPage : ContentPage
         foreach (var lote in Lotes)
         {
             var docs = Documentos.Where(d => d.LoteId == lote.Id).ToList();
-            LotesVista.Add(new LoteCard(lote, docs));
+            var tarjeta = new LoteCard(lote, docs, _lotesSeleccionados.Contains(lote.Id))
+            {
+                ModoSeleccion = _modoSeleccion
+            };
+            LotesVista.Add(tarjeta);
         }
+    }
+
+    private void OnLoteSelectionChanged(object? sender, CheckedChangedEventArgs e)
+    {
+        if (sender is not BindableObject { BindingContext: LoteCard card })
+            return;
+
+        card.Seleccionado = e.Value;
+        if (e.Value)
+            _lotesSeleccionados.Add(card.Lote.Id);
+        else
+            _lotesSeleccionados.Remove(card.Lote.Id);
     }
 
     // Tocar el lote = entrar a la "carpeta"
     private async void OnLoteTapped(object? sender, TappedEventArgs e)
     {
-        if (sender is BindableObject { BindingContext: LoteCard card })
+        if (sender is not BindableObject { BindingContext: LoteCard card })
+            return;
+
+        if (_modoSeleccion)
+        {
+            if (_loteActivadoRecientemente == card.Lote.Id)
+            {
+                _loteActivadoRecientemente = null;
+                return;
+            }
+
+            card.Seleccionado = !card.Seleccionado;
+            if (card.Seleccionado)
+                _lotesSeleccionados.Add(card.Lote.Id);
+            else
+                _lotesSeleccionados.Remove(card.Lote.Id);
+            ReconstruirLotesVista();
+            return;
+        }
+
+        if (_navegando)
+            return;
+
+        _navegando = true;
+        try
+        {
+            LimpiarEstadoVisual();
             await Navigation.PushAsync(new LotePage(card.Lote, Documentos, doc => AbrirDetalleAsync(doc)));
+        }
+        finally
+        {
+            _navegando = false;
+        }
     }
 
     // Botón ⋮ de la tarjeta
@@ -87,12 +356,18 @@ public partial class MainPage : ContentPage
 
     private async Task MostrarOpcionesLoteAsync(Lote lote)
     {
-        var accion = await DisplayActionSheetAsync(lote.Nombre, "Cancelar", null, "Editar", "Eliminar");
+        var accion = await DisplayActionSheetAsync(
+            lote.Nombre,
+            "Cancelar",
+            null,
+            "Cambiar nombre",
+            "Cambiar descripción",
+            "Eliminar");
 
-        if (accion == "Editar")
+        if (accion == "Cambiar nombre")
         {
             var nombre = await DisplayPromptAsync(
-                "Editar lote",
+                "Cambiar nombre",
                 "Nombre del lote:",
                 accept: "Guardar",
                 cancel: "Cancelar",
@@ -110,6 +385,29 @@ public partial class MainPage : ContentPage
             catch (Exception ex)
             {
                 await DisplayAlertAsync("Error", $"No se pudo actualizar el lote: {ex.Message}", "OK");
+            }
+        }
+        else if (accion == "Cambiar descripción")
+        {
+            var descripcion = await DisplayPromptAsync(
+                "Cambiar descripción",
+                "Descripción del lote:",
+                accept: "Guardar",
+                cancel: "Cancelar",
+                initialValue: lote.Descripcion ?? string.Empty);
+
+            if (descripcion is null)
+                return;
+
+            try
+            {
+                lote.Descripcion = string.IsNullOrWhiteSpace(descripcion) ? null : descripcion.Trim();
+                await _database.GuardarLoteAsync(lote);
+                RefrescarLote(lote);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Error", $"No se pudo actualizar la descripción: {ex.Message}", "OK");
             }
         }
         else if (accion == "Eliminar")
@@ -306,7 +604,13 @@ public partial class MainPage : ContentPage
 
 
 
-        var accion = await DisplayActionSheetAsync(lote.Nombre, "Cancelar", null, "Editar", "Eliminar");
+        var accion = await DisplayActionSheetAsync(
+            lote.Nombre,
+            "Cancelar",
+            null,
+            "Cambiar nombre",
+            "Cambiar descripción",
+            "Eliminar");
 
         if (accion == "Ver fotos")
         {
@@ -314,10 +618,10 @@ public partial class MainPage : ContentPage
         }
 
 
-        if (accion == "Editar")
+        if (accion == "Cambiar nombre")
         {
             var nombre = await DisplayPromptAsync(
-                "Editar lote",
+                "Cambiar nombre",
                 "Nombre del lote:",
                 accept: "Guardar",
                 cancel: "Cancelar",
@@ -335,6 +639,29 @@ public partial class MainPage : ContentPage
             catch (Exception ex)
             {
                 await DisplayAlertAsync("Error", $"No se pudo actualizar el lote: {ex.Message}", "OK");
+            }
+        }
+        else if (accion == "Cambiar descripción")
+        {
+            var descripcion = await DisplayPromptAsync(
+                "Cambiar descripción",
+                "Descripción del lote:",
+                accept: "Guardar",
+                cancel: "Cancelar",
+                initialValue: lote.Descripcion ?? string.Empty);
+
+            if (descripcion is null)
+                return;
+
+            try
+            {
+                lote.Descripcion = string.IsNullOrWhiteSpace(descripcion) ? null : descripcion.Trim();
+                await _database.GuardarLoteAsync(lote);
+                RefrescarLote(lote);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Error", $"No se pudo actualizar la descripción: {ex.Message}", "OK");
             }
         }
         else if (accion == "Eliminar")
@@ -388,7 +715,7 @@ public partial class MainPage : ContentPage
 
         var documento = new Documento
         {
-            Nombre = Path.GetFileNameWithoutExtension(foto.FileName),
+            Nombre = $"Foto_{DateTime.Now:yyyy-MM-dd_HH-mm-ss-fff}",
             RutaImagen = ruta,
             LoteId = lote.Id,
             FechaCreacion = DateTime.Now
@@ -477,10 +804,21 @@ public partial class MainPage : ContentPage
 
     private async Task AbrirDetalleAsync(Documento doc, bool iniciarOcr = false)
     {
+        if (_navegando)
+            return;
+
+        _navegando = true;
         var pagina = new DetallePage(doc) { IniciarOcrAlAbrir = iniciarOcr };
         pagina.Actualizado += documento => _ = ActualizarDocumentoAsync(documento);
         pagina.Eliminado += documento => _ = EliminarDocumentoAsync(documento);
-        await Navigation.PushAsync(pagina);
+        try
+        {
+            await Navigation.PushAsync(pagina);
+        }
+        finally
+        {
+            _navegando = false;
+        }
     }
 
     // ================= Operaciones compartidas =================

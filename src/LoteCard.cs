@@ -5,9 +5,10 @@ namespace CamScanner;
 /// <summary>Lote + datos de la vista previa (no toca el modelo ni la base de datos).</summary>
 public sealed class LoteCard
 {
-    public LoteCard(Lote lote, IReadOnlyList<Documento> docsDelLote)
+    public LoteCard(Lote lote, IReadOnlyList<Documento> docsDelLote, bool seleccionado = false)
     {
         Lote = lote;
+        Seleccionado = seleccionado;
 
         // Las 3 más recientes, ordenadas de atrás hacia adelante: la más nueva queda al frente
         var fotos = docsDelLote
@@ -30,7 +31,10 @@ public sealed class LoteCard
     }
 
     public Lote Lote { get; }
+    public bool Seleccionado { get; set; }
+    public bool ModoSeleccion { get; set; }
     public string Nombre => Lote.Nombre;
+    public string Descripcion => Lote.Descripcion ?? string.Empty;
     public DateTime FechaCreacion => Lote.FechaCreacion;
     public string Cantidad { get; }
 

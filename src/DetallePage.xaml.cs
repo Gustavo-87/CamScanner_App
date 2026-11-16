@@ -21,6 +21,7 @@ public partial class DetallePage : ContentPage
     private static bool _ocrInicializado;
 
     private bool _ocrEnCurso;
+    private bool _navegando;
     private bool _avisoAbreEditor;
     private bool _ocrAutoLanzado;
     private int _avisoId;
@@ -62,7 +63,21 @@ public partial class DetallePage : ContentPage
         }
     }
 
-    private async void OnAtrasClicked(object? sender, EventArgs e) => await Navigation.PopAsync();
+    private async void OnAtrasClicked(object? sender, EventArgs e)
+    {
+        if (_navegando)
+            return;
+
+        _navegando = true;
+        try
+        {
+            await Navigation.PopAsync();
+        }
+        finally
+        {
+            _navegando = false;
+        }
+    }
 
     // ================= OCR =================
 
@@ -177,13 +192,24 @@ public partial class DetallePage : ContentPage
 
     private async Task AbrirEditorAsync()
     {
+        if (_navegando)
+            return;
+
+        _navegando = true;
         var pagina = new TextoPage(_doc.Nombre, _doc.TextoExtraido ?? string.Empty);
         pagina.Guardado += texto =>
         {
             _doc.TextoExtraido = texto;
             Actualizado?.Invoke(_doc);
         };
-        await Navigation.PushAsync(pagina);
+        try
+        {
+            await Navigation.PushAsync(pagina);
+        }
+        finally
+        {
+            _navegando = false;
+        }
     }
 
     // ================= Indicador de progreso discreto =================
@@ -264,6 +290,54 @@ public partial class DetallePage : ContentPage
         {
             await DisplayAlertAsync("Error al exportar",
                 $"No se pudo generar el archivo Excel: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnGuardarExcelTapped(object? sender, TappedEventArgs e)
+    {
+        try
+        {
+            var lote = (await _database.ObtenerLotesAsync())
+                .FirstOrDefault(l => l.Id == _doc.LoteId);
+            if (lote is null)
+            {
+                await DisplayAlertAsync("Error", "No se encontró el lote asociado al documento.", "OK");
+                return;
+            }
+
+            var guardado = await ArchivoService.GuardarAsync(
+                _excelExportService.ExportarDocumento(_doc, lote.Nombre),
+                $"CamScanner_{_doc.Id}.xlsx");
+
+            if (guardado)
+                await DisplayAlertAsync("Guardado", "El archivo Excel se guardó correctamente.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al guardar", $"No se pudo guardar el Excel: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnGuardarFotoTapped(object? sender, TappedEventArgs e)
+    {
+        try
+        {
+            if (!File.Exists(_doc.RutaImagen))
+            {
+                await DisplayAlertAsync("Archivo no encontrado", "La imagen ya no existe en el dispositivo.", "OK");
+                return;
+            }
+
+            var guardado = await ArchivoService.GuardarAsync(
+                await File.ReadAllBytesAsync(_doc.RutaImagen),
+                $"{_doc.Nombre}.jpg");
+
+            if (guardado)
+                await DisplayAlertAsync("Guardado", "La foto se guardó correctamente.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al guardar", $"No se pudo guardar la foto: {ex.Message}", "OK");
         }
     }
 

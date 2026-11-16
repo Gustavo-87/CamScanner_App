@@ -32,4 +32,16 @@ public partial class TextoPage : ContentPage
         Guardado?.Invoke(TextoEditor.Text ?? string.Empty);
         await Navigation.PopAsync();
     }
+
+    private async void OnLimpiarClicked(object? sender, EventArgs e)
+    {
+        var confirmar = await DisplayAlertAsync(
+            "Limpiar texto",
+            "Se borrará el texto actual. Después de guardar podrás volver a escanearlo.",
+            "Limpiar",
+            "Cancelar");
+
+        if (confirmar)
+            TextoEditor.Text = string.Empty;
+    }
 }

@@ -20,12 +20,16 @@
                     VerticalOptions="Fill" />
         </Border>
 
-        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12">
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="8">
             <Button Grid.Column="0" Text="Copiar" CornerRadius="24" HeightRequest="48"
                     BackgroundColor="{StaticResource Info}"
                     TextColor="{StaticResource OnStatus}"
                     Clicked="OnCopiarClicked" />
-            <Button Grid.Column="1" Text="Guardar" CornerRadius="24" HeightRequest="48"
+            <Button Grid.Column="1" Text="Limpiar" CornerRadius="24" HeightRequest="48"
+                    BackgroundColor="{StaticResource Danger}"
+                    TextColor="{StaticResource OnStatus}"
+                    Clicked="OnLimpiarClicked" />
+            <Button Grid.Column="2" Text="Guardar" CornerRadius="24" HeightRequest="48"
                     BackgroundColor="{StaticResource Success}"
                     TextColor="{StaticResource OnStatus}"
                     Clicked="OnGuardarClicked" />
