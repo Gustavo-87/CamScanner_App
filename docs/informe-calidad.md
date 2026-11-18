@@ -20,7 +20,9 @@ Los resultados automatizados no equivalen a la aprobación de todos los casos de
 ---
 
 
-## 1. Objetivo
+**Proyecto:** CamScanner · Ingeniería de Software II (2026-2)\
+**Fecha de actualización:** 17 de noviembre de 2026\
+**Rama revisada:** `documentacion-richard`
 
 Evaluar el estado comprobable de CamScanner a partir de la revisión del
 código fuente, las dependencias, la documentación y los resultados de
