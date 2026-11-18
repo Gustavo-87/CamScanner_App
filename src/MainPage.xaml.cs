@@ -53,6 +53,8 @@ public partial class MainPage : ContentPage
         _loteActivadoRecientemente = loteInicial.Lote.Id;
         this.FindByName<Button>("ExportarLotesButton").IsVisible = EsPlataformaMovil();
         this.FindByName<Button>("GuardarLotesButton").IsVisible = EsPlataformaMovil();
+        this.FindByName<Button>("ExportarZipButton").IsVisible = true;
+        this.FindByName<Button>("CompartirZipButton").IsVisible = EsPlataformaMovil();
         this.FindByName<Button>("BaseDatosButton").IsVisible = EsPlataformaMovil();
         this.FindByName<Button>("CancelarSeleccionButton").IsVisible = true;
 
@@ -71,9 +73,80 @@ public partial class MainPage : ContentPage
         _loteActivadoRecientemente = null;
         this.FindByName<Button>("ExportarLotesButton").IsVisible = false;
         this.FindByName<Button>("GuardarLotesButton").IsVisible = false;
+        this.FindByName<Button>("ExportarZipButton").IsVisible = false;
+        this.FindByName<Button>("CompartirZipButton").IsVisible = false;
         this.FindByName<Button>("BaseDatosButton").IsVisible = false;
         this.FindByName<Button>("CancelarSeleccionButton").IsVisible = false;
         ReconstruirLotesVista();
+    }
+
+    private async void OnExportarZipClicked(object? sender, EventArgs e)
+    {
+        await ProcesarZipAsync(compartir: false);
+    }
+
+    private async void OnCompartirZipClicked(object? sender, EventArgs e)
+    {
+        await ProcesarZipAsync(compartir: true);
+    }
+
+    private async Task ProcesarZipAsync(bool compartir)
+    {
+        if (_exportandoLotes)
+            return;
+
+        var lotesConDocumentos = ObtenerLotesSeleccionadosConDocumentos();
+        if (lotesConDocumentos.Count == 0)
+        {
+            await DisplayAlertAsync(
+                "Sin documentos",
+                "Selecciona al menos un lote con documentos para crear el ZIP.",
+                "OK");
+            return;
+        }
+
+        _exportandoLotes = true;
+        try
+        {
+            var contenido = await new ZipExportService().ExportarLotesAsync(lotesConDocumentos);
+            var nombre = $"CamScanner_Lotes_{DateTime.Now:yyyyMMdd_HHmm}.zip";
+
+            if (compartir)
+            {
+                var ruta = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid():N}_{nombre}");
+                await File.WriteAllBytesAsync(ruta, contenido);
+                await Share.Default.RequestAsync(new ShareFileRequest
+                {
+                    Title = "Compartir lotes como ZIP",
+                    File = new ShareFile(ruta, "application/zip")
+                });
+            }
+            else if (await ArchivoService.GuardarAsync(contenido, nombre))
+            {
+                await DisplayAlertAsync("Guardado", "El ZIP se guardó correctamente.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al crear ZIP", ex.Message, "OK");
+        }
+        finally
+        {
+            _exportandoLotes = false;
+        }
+    }
+
+    private List<(Lote Lote, IEnumerable<Documento> Documentos)> ObtenerLotesSeleccionadosConDocumentos()
+    {
+        return Lotes
+            .Where(lote => _lotesSeleccionados.Contains(lote.Id))
+            .Select(lote => (Lote: lote,
+                Documentos: (IEnumerable<Documento>)Documentos
+                    .Where(documento => documento.LoteId == lote.Id)
+                    .OrderBy(documento => documento.Orden)
+                    .ToList()))
+            .Where(grupo => grupo.Documentos.Any())
+            .ToList();
     }
 
     private async void OnGuardarLotesClicked(object? sender, EventArgs e)

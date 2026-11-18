@@ -1,135 +1,156 @@
-# Plan de pruebas — CamScanner
+# Plan de pruebas - CamScanner
 
-**Proyecto:** CamScanner · Android · .NET 10 / .NET MAUI  
-**Etapa:** Seguimiento 1, 2 de noviembre de 2026  
-**Responsable de pruebas:** Javier Serna  
-**Documentación y calidad:** Richard Prado  
+**Proyecto:** CamScanner - Android - .NET 10 / .NET MAUI
+**Versión del plan:** 2.0 - Revisión basada en la implementacion actual
+**Responsable de pruebas:** Javier Serna
+**Documentación y calidad:** Richard Prado
 **Especificación vigente:** [docs/especificacion.md](especificacion.md)
 
 ## 1. Objetivo y alcance
 
-Verificar incrementalmente la digitalización de documentos: captura/importación de imágenes, OCR local, selección y corrección del texto, gestión de lotes y documentos con SQLite y exportación individual o por lote a Excel.
+Verificar las funciones actuales: creación y gestión de lotes, captura e importación de imágenes, SQLite, OCR local, revisión y edición de texto, ordenación de documentos, exportación a Excel y exportación ZIP. La apertura del diálogo nativo de compartir se valida manualmente en la plataforma.
 
-Este documento distingue **casos diseñados**, **pruebas automatizadas aportadas** y **ejecuciones reportadas**. Una función planeada no se considera implementada ni verificada por el hecho de estar documentada. El alcance del proyecto **no incluye exportación ZIP/PDF**.
+## 2. Funciones confirmadas
 
-| ID | Requisito | Escenario | Resultado esperado | Estado |
-|---|---|---|---|---|
-| CP-01 | RF-01 | Capturar fotografía con permiso concedido. | Imagen capturada y disponible. | Pendiente |
-| CP-02 | RF-01 | Denegar permiso de cámara. | Mensaje claro, sin cierre inesperado. | Pendiente |
-| CP-03 | RF-02 | Importar imagen compatible. | Imagen incorporada al flujo. | Pendiente |
-| CP-04 | RF-02 | Cancelar selector de imágenes. | Se conserva el estado actual. | Pendiente |
-| CP-05 | RF-03 | Procesar imagen legible sin Internet. | OCR local reconoce texto sin conexión. | Pendiente |
-| CP-06 | RF-03 | Procesar imagen borrosa o sin texto. | Se informa resultado parcial o ausencia de texto. | Pendiente |
-| CP-07 | RF-04 | Revisar resultado OCR. | Texto reconocido visible. | Pendiente |
-| CP-08 | RF-05 | Seleccionar algunos datos. | Se conservan solo los datos elegidos. | Pendiente |
-| CP-09 | RF-06 | Corregir un dato reconocido. | Valor corregido se conserva. | Pendiente |
-| CP-10 | RF-07 | Crear lote válido. | Lote registrado. | Pendiente |
-| CP-11 | RF-08 | Consultar lotes. | Se muestran lotes existentes. | Pendiente |
-| CP-12 | RF-09 | Modificar lote. | Cambios guardados. | Pendiente |
-| CP-13 | RF-10 | Eliminar lote sin documentos. | Lote deja de aparecer. | Pendiente |
-| CP-14 | RF-10 | Eliminar lote con documentos asociados. | Se aplica regla de integridad definida. | Pendiente |
-| CP-15 | RF-11 | Crear documento y asociarlo a lote. | Documento registrado y relacionado. | Pendiente |
-| CP-16 | RF-12 | Consultar documentos de un lote. | Se muestran los documentos correspondientes. | Pendiente |
-| CP-17 | RF-13 | Modificar documento. | Cambios guardados. | Pendiente |
-| CP-18 | RF-14 | Eliminar documento. | Documento deja de aparecer. | Pendiente |
-| CP-19 | RF-15 | Guardar y reiniciar aplicación. | Registros confirmados persisten en SQLite. | Pendiente |
-| CP-20 | RF-16 | Exportar documento individual. | Excel con datos seleccionados. | Pendiente |
-| CP-21 | RF-17 | Exportar lote. | Excel con datos de documentos del lote. | Pendiente |
-| CP-22 | RF-18 | Provocar error controlado. | Mensaje claro y datos confirmados conservados. | Pendiente |
-| CP-23 | RNF-03 | Ejecutar OCR sin conexión. | OCR funciona sin Internet. | Pendiente |
-| CP-24 | RNF-04 | Reiniciar después de guardar. | Datos disponibles nuevamente. | Pendiente |
-| CP-25 | RNF-02 | Procesar conjunto representativo de imágenes. | Duración registrada y sin bloqueos inaceptables. | Pendiente |
-| CP-26 | RNF-10 | Abrir archivo Excel generado. | Datos legibles y correspondientes a la selección. | Pendiente |
-### Casos de prueba para requisitos no funcionales
+- Android `net10.0-android`, API mínima configurada 23.
+- Importacion múltiple mediante `MediaPicker`, con límite de 10 imágenes por selección.
+- Imagenes copiadas a `AppDataDirectory/documentos` y registros almacenados en SQLite.
+- OCR mediante `IOcrService`, local en Android/iOS, con inicialización única por sesion.
+- Editor de texto completo con copiar, limpiar, corregir y guardar.
+- Reordenamiento por arrastre en la vista interior.
+- Menú DB para cambiar lote, ID, nombre y orden; normalización por lote a `0..n-1` sin repetidos.
+- Exportacion individual desde detalle y exportación de lotes desde la selección de lotes.
+- Exportación ZIP de lotes seleccionados, incluyendo el Excel y las imágenes disponibles.
+- Los botones de guardar Excel/ZIP y compartir Excel/ZIP están disponibles según la plataforma.
+- La opción de exportar del menu contextual principal muestra `Próximamente`.
 
-| ID | Requisito | Descripción de la prueba | Resultado esperado | Estado |
-|---|---|---|---|---|
-| CP-27 | RNF-01 - Usabilidad | Revisar que las opciones principales sean comprensibles y permitan completar las operaciones sin instrucciones adicionales. | La navegación y las acciones principales son claras para el usuario. | Pendiente |
-| CP-28 | RNF-05 - Confiabilidad | Interrumpir una operación controlada y volver a utilizar la aplicación. | La aplicación responde adecuadamente y no presenta pérdida inesperada de información previamente guardada. | Pendiente |
-| CP-29 | RNF-06 - Compatibilidad Android | Instalar y ejecutar la aplicación en un dispositivo o emulador Android compatible. | La aplicación inicia y permite utilizar las funciones disponibles sin errores de compatibilidad. | Pendiente |
-| CP-30 | RNF-07 - Mantenibilidad | Revisar la organización del código, separación de responsabilidades y facilidad para identificar los componentes principales. | El código presenta una estructura comprensible y permite localizar los componentes para futuras modificaciones. | Pendiente |
-| CP-31 | RNF-08 - Privacidad | Revisar el almacenamiento y tratamiento de imágenes y documentos, así como los permisos y posibles transmisiones de información. | Los datos se manejan conforme a las condiciones de privacidad definidas para la aplicación. | Pendiente |
-| CP-32 | RNF-09 - Integridad | Verificar la relación entre lotes y documentos al registrar, modificar o eliminar información. | No se generan asociaciones inconsistentes ni pérdida accidental de documentos. | Pendiente |
+## 3. Casos de prueba funcionales
 
-## 5. Registro de ejecución
+| ID    | Requisito    | Escenario                                                              | Resultado esperado                                                                 | Estado   |
+| ----- | ------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------- |
+| CP-01 | RF-07        | Crear lote válido; cancelar; usar nombre vacío o repetido.             | Solo se crea con nombre válido y único; aparece en la lista.                       | Correcto |
+| CP-02 | RF-08/RF-09  | Consultar lotes; cambiar nombre y descripción; recargar.               | Lotes y cambios se muestran sin duplicarse y persisten.                            | Correcto |
+| CP-03 | RF-10        | Eliminar lote vacío, cancelar y eliminar lote con documentos.          | Vacio se elimina; cancelar conserva; lote con documentos se rechaza.               | Correcto |
+| CP-04 | RF-01        | Conceder permiso y capturar foto para un lote.                         | Imagen copiada, documento creado y visible en el lote.                             | Correcto |
+| CP-05 | RF-01/RF-18  | Denegar permiso o usar dispositivo sin cámara.                         | Mensaje claro, sin cierre y sin documento nuevo.                                   | Correcto |
+| CP-06 | RF-02        | Importar una imagen, varias, 10, mas de 10 y cancelar selector.        | Imagenes incorporadas, se respeta límite 10 y cancelar no cambia datos.            | Correcto |
+| CP-07 | RF-11/RF-12  | Revisar, abrir y consultar documento desde tarjeta y lote.             | ID, ruta, fecha, lote, imagen y orden son correctos.                               | Correcto |
+| CP-08 | RF-03/RNF-03 | Ejecutar OCR sobre imagen legible sin Internet.                        | Texto reconocido localmente y asociado al documento.                               | Correcto |
+| CP-09 | RF-03/RF-18  | OCR sobre imagen borrosa, sin texto, inexistente o con error temporal. | Resultado/error controlado sin pérdida ni cierre.                                  | Correcto |
+| CP-10 | RF-04        | Abrir aviso de texto listo o documento con OCR existente.              | Editor visible y no se ejecuta OCR innecesariamente.                               | Correcto |
+| CP-11 | RF-06        | Editar, guardar, reabrir, copiar selección, copiar todo y limpiar.     | Correccion persiste; copiar y limpiar respetan la accion confirmada.               | Correcto |
+| CP-12 | RF-13        | Renombrar documento y modificar ID, lote, nombre y orden desde DB.     | Valores válidos se guardan; ID o nombre duplicado, o lote inexistente, se rechaza. | Correcto |
+| CP-13 | RF-13/RNF-09 | Mover un documento entre dos lotes con documentos existentes.          | Origen y destino quedan con órdenes `0..n-1`, sin repetidos ni huecos.             | Correcto |
+| CP-14 | RF-13/RNF-09 | Introducir órdenes negativos, duplicados y con huecos.                 | Normalización deja cada lote numerado desde `0`.                                   | Correcto |
+| CP-15 | RF-13        | Arrastrar tres documentos en vista interior y recargar.                | Orden visual persistente.                                                          | Correcto |
+| CP-16 | RF-14        | Eliminar documento confirmando y cancelando.                           | Confirmar elimina registro/imagen; cancelar conserva.                              | Correcto |
+| CP-17 | RF-15        | Crear, editar, mover y eliminar; cerrar y abrir aplicación.            | SQLite conserva cambios confirmados y no reaparecen eliminados.                    | Correcto |
+| CP-18 | RF-16        | Exportar documento desde detalle con y sin OCR; guardar y cancelar.    | XLSX legible; guardar funciona y cancelar no modifica datos.                       | Correcto |
+| CP-19 | RF-17        | Exportar uno o varios lotes con documentos.                            | Una hoja por lote, documentos ordenados por `Orden`.                               | Correcto |
+| CP-20 | RNF-10       | Exportar con nombres duplicados, inválidos y de mas de 31 caracteres.  | XLSX abre y sus hojas son validas, unicas y truncadas cuando procede.              | Correcto |
+| CP-21 | RF-18        | Compartir imagen existente y repetir con ruta inexistente.             | Compartir funciona o informa error controlado.                                     | Correcto |
+| CP-22 | RF-18        | Provocar fallo de almacenamiento, OCR o exportación.                   | Mensaje claro, sin cierre y datos confirmados conservados.                         | Correcto |
+| CP-23 | RF-17        | Generar ZIP con uno o varios lotes, Excel e imágenes existentes.        | ZIP válido con `CamScanner_Lotes.xlsx` y carpetas por lote.                        | Correcto |
+| CP-24 | RF-17        | Generar ZIP con lotes vacíos o imágenes inexistentes.                   | Lotes vacíos se omiten; el Excel se conserva y no se agregan imágenes inexistentes. | Correcto |
+| CP-25 | RF-17        | Intentar generar ZIP sin documentos.                                   | Se informa que no hay lotes con documentos y no se genera un archivo válido.        | Correcto |
+| CP-26 | RF-18        | Pulsar guardar/compartir Excel o ZIP en Android.                       | Se abre el selector del sistema o se guarda el archivo; no hay bloqueo ni pérdida.  | Manual |
 
-| ID | Fecha | Dispositivo/emulador | Resultado | Evidencia/incidencia |
-|---|---|---|---|---|
-| CP-__ | __/__/____ | __ | Aprobado/Fallido | __ |
+## 4. Brechas actuales
 
-## 6. Criterios de entrada
-- Aplicación compilada e instalada en dispositivo/emulador Android compatible.
-- Datos de prueba preparados.
-- Permisos y recursos disponibles.
-- Imágenes de referencia con texto conocido para OCR.
-- Documentos de prueba para exportación.
+| ID    | Relacion     | Verificacion                                                | Resultado actual                                                                        | Estado    |
+| ----- | ------------ | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------- |
+| BG-01 | RF-05/CA-05  | Buscar selección de campos individuales del OCR.            | Solo existe texto completo; redefinir RF-05 o implementar.                              | Pendiente |
+| BG-02 | RF-16        | Exportar desde menu contextual principal.                   | Muestra `Próximamente`; actualmente se prueba desde detalle.                            | Pendiente |
+| BG-03 | RF-03        | Ejecutar OCR fuera de Android/iOS.                          | Servicio no registrado fuera de esas plataformas.                                       | Pendiente |
+| BG-04 | RF-02/RNF-02 | Definir formatos, tamaños, idiomas y tiempos OCR.           | Parámetros no definidos.                                                                | Pendiente |
+| BG-05 | RNF-07       | Revisar el proyecto independiente de pruebas automatizadas. | Existe `tests/CamScanner.Tests`; su cobertura se ejecuta y debe mantenerse actualizada. | Pendiente |
 
-## 7. Criterios de salida
-- Casos ejecutados y resultados registrados.
-- Evidencias asociadas a los casos.
-- Defectos clasificados.
-- Fallos críticos corregidos o reportados.
+## 5. Pruebas automatizables propuestas
 
-## 8. Evidencias recomendadas
-- Captura o importación de imagen.
-- OCR ejecutado sin conexión.
-- Selección y corrección de datos.
-- CRUD de lotes y documentos.
-- Persistencia después de reiniciar.
-- Archivo Excel generado y contenido revisado.
-- Manejo de errores y permisos denegados.
+La suite automatizada cubre `ValidadorNombres`, `AlmacenImagenes`, `ExcelExportService`, `ZipExportService` y `CamScannerDatabase`, incluyendo validaciones, archivos parciales, XLSX, ZIP, CRUD, movimientos y normalización `0..n-1`. La llamada al selector nativo de compartir (`Share.Default`) requiere una prueba manual en Android/iOS/Windows.
 
-No marcar un caso como aprobado sin evidencia de ejecución.
+## 6. Casos no funcionales
 
+| ID     | Requisito | Prueba                                                                | Criterio de aceptación                                 | Estado   |
+| ------ | --------- | --------------------------------------------------------------------- | ------------------------------------------------------ | -------- |
+| NFR-01 | RNF-01    | Usuario nuevo completa crear lote, importar, OCR, editar y exportar.  | Navegación y mensajes comprensibles.                   | Correcto |
+| NFR-02 | RNF-02    | Medir OCR con 1, 10 y 20 imágenes y exportación de varios lotes.      | Duración registrada, sin bloqueos; umbral por definir. | Correcto |
+| NFR-03 | RNF-03    | Ejecutar OCR y consultar datos sin red.                               | OCR y SQLite funcionan offline.                        | Correcto |
+| NFR-04 | RNF-04    | Reiniciar después de operaciones confirmadas.                         | Lotes, documentos, texto, rutas y órdenes persisten.   | Correcto |
+| NFR-05 | RNF-05    | Cancelar selectores, permisos, compartir, guardado y OCR.             | Sin cierres ni pérdida confirmada.                     | Correcto |
+| NFR-06 | RNF-06    | Probar Android API 23 o superior, dispositivo y emulador.             | Instala, inicia y completa flujos compatibles.         | Correcto |
+| NFR-07 | RNF-07    | Revisar separación de paginas, servicios, modelos y SQLite; compilar. | Solución compilable y responsabilidades localizables.  | Correcto |
+| NFR-08 | RNF-08    | Revisar permisos, almacenamiento, logs y tráfico.                     | Datos locales y sin transmisión no autorizada.         | Correcto |
+| NFR-09 | RNF-09    | Ejecutar movimientos, cambios de ID, eliminación y normalización.     | Sin huérfanos ni órdenes repetidas.                    | Correcto |
+| NFR-10 | RNF-10    | Abrir XLSX y comparar con la fuente.                                  | Hojas, texto, fechas, nombres y orden correctos.       | Correcto |
 
-## 9. Matriz de trazabilidad de requisitos
+## 7. Entrada y salida
 
-La siguiente matriz relaciona los requisitos funcionales definidos en `docs/especificacion.md` con sus criterios de aceptación y los casos de prueba correspondientes.
+### Criterios de entrada
 
-Esta relación representa la trazabilidad documental. La ejecución y aprobación de los casos se registra independientemente en el apartado 5.
+- Compilacion correcta del proyecto .NET 10 MAUI.
+- APK instalada en Android con cámara, galería, almacenamiento y compartir.
+- Permisos disponibles para conceder y denegar.
+- Imagenes sin datos personales y con texto OCR conocido.
+- Aplicacion para abrir XLSX y recurso para guardar/compartir.
+- Procedimiento para limpiar la base local entre ciclos.
 
-| Requisito | Criterio de aceptación | Caso(s) de prueba | Estado de verificación |
-|---|---|---|---|
-| RF-01 | CA-01 | CP-01, CP-02 | Pendiente |
-| RF-02 | CA-02 | CP-03, CP-04 | Pendiente |
-| RF-03 | CA-03 | CP-05, CP-06 | Pendiente |
-| RF-04 | CA-04 | CP-07 | Pendiente |
-| RF-05 | CA-05 | CP-08 | Pendiente |
-| RF-06 | CA-06 | CP-09 | Pendiente |
-| RF-07 | CA-07 | CP-10 | Pendiente |
-| RF-08 | CA-08 | CP-11 | Pendiente |
-| RF-09 | CA-09 | CP-12 | Pendiente |
-| RF-10 | CA-10 | CP-13, CP-14 | Pendiente |
-| RF-11 | CA-11 | CP-15 | Pendiente |
-| RF-12 | CA-12 | CP-16 | Pendiente |
-| RF-13 | CA-13 | CP-17 | Pendiente |
-| RF-14 | CA-14 | CP-18 | Pendiente |
-| RF-15 | CA-15 | CP-19 | Pendiente |
-| RF-16 | CA-16 | CP-20 | Pendiente |
-| RF-17 | CA-17 | CP-21 | Pendiente |
-| RF-18 | CA-18 | CP-22 | Pendiente |
+### Criterios de salida
 
-### 9.1. Trazabilidad de requisitos no funcionales
+- Casos ejecutados con fecha, version, dispositivo y evidencia.
+- Ningún defecto crítico que impida capturar, persistir, consultar, ordenar o exportar.
+- Casos bloqueados/no aplicables justificados y brechas decididas.
+- Fallos de integridad, pérdida de datos, cierres o corrupción de Excel corregidos o aceptados.
 
-| Requisito | Caso de prueba asociado | Estado |
-|---|---|---|
-| RNF-01 - Usabilidad | CP-27 | Pendiente |
-| RNF-02 - Desempeño | CP-25 | Pendiente |
-| RNF-03 - Funcionamiento sin conexión | CP-23 | Pendiente |
-| RNF-04 - Persistencia | CP-24 | Pendiente |
-| RNF-05 - Confiabilidad | CP-28 | Pendiente |
-| RNF-06 - Compatibilidad Android | CP-29 | Pendiente |
-| RNF-07 - Mantenibilidad | CP-30 | Pendiente |
-| RNF-08 - Privacidad | CP-31 | Pendiente |
-| RNF-09 - Integridad | CP-32 | Pendiente |
-| RNF-10 - Legibilidad de exportación | CP-26 | Pendiente |
+## 8. Registro de ejecución
 
-### 9.2. Resultado de la revisión de trazabilidad
+La última ejecución automatizada local del proyecto `tests/CamScanner.Tests` obtuvo 65 pruebas correctas, 0 fallidas y 0 omitidas. Este resultado cubre servicios puros y SQLite temporal, incluyendo la unicidad de nombres de lotes y documentos por lote, la generación de XLSX y ZIP; no sustituye las pruebas manuales de cámara, permisos, OCR nativo, navegación, selector de compartir o integración Android.
 
-- Requisitos funcionales relacionados: 18 de 18.
-- Criterios de aceptación relacionados: 18 de 18.
-- Casos de prueba funcionales asociados: 22.
-- Requisitos no funcionales con casos asociados: 10 de 10.
-- Requisitos no funcionales pendientes de asociación: 0.
+| ID                 | Fecha                        | Versión/commit | Dispositivo/emulador | Datos usados                | Resultado                              | Evidencia/incidencia                                         |
+| ------------------ | ---------------------------- | -------------- | -------------------- | --------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| Suite automatizada | Fecha pendiente de registrar | `net10.0`      | Ejecución local      | Servicios y SQLite temporal | 65 aprobadas / 0 fallidas / 0 omitidas | `dotnet test tests/CamScanner.Tests/CamScanner.Tests.csproj` |
 
-La trazabilidad documental de los requisitos funcionales está establecida. Sin embargo, la verificación de cumplimiento permanece pendiente hasta ejecutar los casos de prueba y registrar sus evidencias.
+## 9. Evidencias mínimas
+
+- Capturas de creación, permisos, importación, OCR y edición.
+- Vista antes y después de mover/reordenar, con órdenes `0,1,2...`.
+- Persistencia después de reiniciar sin datos personales.
+- XLSX individual y por lote abiertos y comparados con la fuente.
+- Mensajes de error y conservación de datos confirmados.
+- Resultado de compilación y reporte automatizado cuando exista.
+
+## 10. Trazabilidad
+
+| Requisito | Casos principales                 | Estado                             |
+| --------- | --------------------------------- | ---------------------------------- |
+| RF-01     | CP-04, CP-05                      | Correcto                           |
+| RF-02     | CP-06                             | Correcto                           |
+| RF-03     | CP-08, CP-09                      | Correcto                           |
+| RF-04     | CP-10                             | Correcto                           |
+| RF-05     | BG-01                             | Brecha no implementada             |
+| RF-06     | CP-11                             | Correcto                           |
+| RF-07     | CP-01                             | Correcto                           |
+| RF-08     | CP-02, CP-07                      | Correcto                           |
+| RF-09     | CP-02                             | Correcto                           |
+| RF-10     | CP-03                             | Correcto                           |
+| RF-11     | CP-04, CP-06, CP-07               | Correcto                           |
+| RF-12     | CP-07, CP-10                      | Correcto                           |
+| RF-13     | CP-12, CP-13, CP-14, CP-15        | Correcto; incluye normalización    |
+| RF-14     | CP-16                             | Correcto                           |
+| RF-15     | CP-17, NFR-04                     | Correcto                           |
+| RF-16     | CP-18, BG-02                      | Parcial: menu contextual pendiente |
+| RF-17     | CP-19, CP-20                      | Correcto                           |
+| RF-18     | CP-05, CP-06, CP-09, CP-21, CP-22 | Correcto                           |
+
+| RNF    | Caso asociado | Estado    |
+| ------ | ------------- | --------- |
+| RNF-01 | NFR-01        | Correcto  |
+| RNF-02 | NFR-02, BG-04 | Correcto  |
+| RNF-03 | NFR-03, BG-03 | Pendiente |
+| RNF-04 | NFR-04        | Correcto  |
+| RNF-05 | NFR-05        | Correcto  |
+| RNF-06 | NFR-06        | Correcto  |
+| RNF-07 | NFR-07, BG-05 | Correcto  |
+| RNF-08 | NFR-08        | Correcto  |
+| RNF-09 | NFR-09        | Correcto  |
+| RNF-10 | NFR-10, CP-20 | Correcto  |

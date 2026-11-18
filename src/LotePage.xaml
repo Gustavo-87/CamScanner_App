@@ -21,7 +21,7 @@
                    Margin="8,0,8,4" />
 
             <HorizontalStackLayout Spacing="8" Margin="8,0,8,8">
-                <Button Text="Compartir lote a Excel"
+                <Button Text="Compartir Excel"
                         Clicked="OnExportarExcelClicked"
                         HorizontalOptions="FillAndExpand" />
                 <Button Text="Guardar Excel"

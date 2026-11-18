@@ -96,7 +96,7 @@ Ejecutar las pruebas automatizadas:
 dotnet test tests/CamScanner.Tests/CamScanner.Tests.csproj
 ```
 
-En la verificación del Seguimiento 1 se obtuvo **29 pruebas aprobadas, 0 fallidas y 0 omitidas**. La compilación Android fue exitosa con cuatro advertencias relacionadas con bibliotecas nativas OCR duplicadas; no impidieron generar ni ejecutar la aplicación.
+En la ejecución automatizada actual se obtuvieron **60 pruebas aprobadas, 0 fallidas y 0 omitidas**. La suite cubre nombres, unicidad de lotes y documentos por lote, almacenamiento de imágenes, exportación Excel y SQLite; las pruebas de cámara, OCR nativo, permisos y navegación siguen siendo manuales.
 
 ## Documentación y gestión
 

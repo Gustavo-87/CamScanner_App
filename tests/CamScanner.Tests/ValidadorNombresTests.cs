@@ -88,4 +88,25 @@ public class ValidadorNombresTests
     {
         Assert.Equal(esperado, ValidadorNombres.Normalizar(entrada));
     }
+
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData("", false)]
+    [InlineData("   ", false)]
+    [InlineData("Factura", true)]
+    public void NombreEsValido_ClasificaElNombre(string? nombre, bool esperado)
+    {
+        Assert.Equal(esperado, ValidadorNombres.NombreEsValido(nombre));
+    }
+
+    [Fact]
+    public void ValidarLista_DevuelveTodosLosErroresAplicables()
+    {
+        var resultado = ValidadorNombres.ValidarLista(new string?[] { "Factura", " factura ", "   " });
+
+        Assert.False(resultado.EsValido);
+        Assert.Equal(2, resultado.Errores.Count);
+        Assert.Contains(resultado.Errores, error => error.Contains("sin nombre"));
+        Assert.Contains(resultado.Errores, error => error.Contains("repetidos"));
+    }
 }

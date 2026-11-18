@@ -21,7 +21,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="..\..\src\Services\*.cs" LinkBase="Services" />
+		<Compile Include="..\..\src\Services\AlmacenImagenes.cs" Link="Services\AlmacenImagenes.cs" />
+		<Compile Include="..\..\src\Services\ExcelExportService.cs" Link="Services\ExcelExportService.cs" />
+		<Compile Include="..\..\src\Services\ZipExportService.cs" Link="Services\ZipExportService.cs" />
+		<Compile Include="..\..\src\Services\ValidadorNombres.cs" Link="Services\ValidadorNombres.cs" />
+		<Compile Include="..\..\src\Data\CamScannerDatabase.cs" Link="Data\CamScannerDatabase.cs" />
 		<Compile Include="..\..\src\Models\*.cs" LinkBase="Models" />
 	</ItemGroup>
 

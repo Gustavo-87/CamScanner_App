@@ -61,22 +61,45 @@
         <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
 
             <!-- ============ TÍTULO ============ -->
-            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+            <Grid Grid.Row="0" RowDefinitions="Auto,Auto" RowSpacing="6">
                 <Label Text="Mis lotes" FontSize="22" FontAttributes="Bold"
+                       Grid.Row="0"
                        VerticalOptions="Center"
                        TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
-                <Button x:Name="ExportarLotesButton" Grid.Column="1"
-                        Text="Compartir" FontSize="12" Padding="10,4"
-                        IsVisible="False" Clicked="OnExportarLotesClicked" />
-                <Button x:Name="BaseDatosButton" Grid.Column="3"
-                        Text="BD" FontSize="12" Padding="10,4"
-                        IsVisible="False" Clicked="OnBaseDatosClicked" />
-                <Button x:Name="GuardarLotesButton" Grid.Column="2"
-                        Text="Guardar" FontSize="12" Padding="10,4"
-                        IsVisible="False" Clicked="OnGuardarLotesClicked" />
-                <Button x:Name="CancelarSeleccionButton" Grid.Column="4"
-                        Text="Salir" FontSize="12" Padding="10,4"
-                        IsVisible="False" Clicked="OnCancelarSeleccionClicked" />
+                <ScrollView Grid.Row="1"
+                            Margin="0,0,0,10"
+                            Orientation="Horizontal"
+                            HorizontalScrollBarVisibility="Never"
+                            VerticalScrollBarVisibility="Never">
+                    <HorizontalStackLayout Spacing="8" Padding="0,0,0,4">
+                        <Button x:Name="CancelarSeleccionButton"
+        Text="Salir" FontSize="12" Padding="10,4"
+        BackgroundColor="#D9534F" TextColor="White" CornerRadius="8"
+        IsVisible="False" Clicked="OnCancelarSeleccionClicked" />
+                        <Button x:Name="BaseDatosButton"
+         Text="BD" FontSize="12" Padding="10,4"
+         BackgroundColor="{StaticResource LogoSkyDeep}" TextColor="White" CornerRadius="8"
+         IsVisible="False" Clicked="OnBaseDatosClicked" />
+                        <Button x:Name="ExportarLotesButton"
+                                Text="Compartir registro" FontSize="12" Padding="10,4"
+                                BackgroundColor="{StaticResource LogoLavender}" TextColor="{StaticResource OnStatus}" CornerRadius="8"
+                                IsVisible="False" Clicked="OnExportarLotesClicked" />
+                       
+                        <Button x:Name="GuardarLotesButton"
+                                Text="Guardar registro" FontSize="12" Padding="10,4"
+                                BackgroundColor="{StaticResource LogoLavender}" TextColor="{StaticResource OnStatus}" CornerRadius="8"
+                                IsVisible="False" Clicked="OnGuardarLotesClicked" />
+                        <Button x:Name="ExportarZipButton"
+                                Text="Exportar imágenes" FontSize="12" Padding="10,4"
+                                BackgroundColor="{StaticResource LogoCyan}" TextColor="{StaticResource OnStatus}" CornerRadius="8"
+                                IsVisible="False" Clicked="OnExportarZipClicked" />
+                        <Button x:Name="CompartirZipButton"
+                                Text="Compartir imágenes" FontSize="12" Padding="10,4"
+                                BackgroundColor="{StaticResource LogoCyan}" TextColor="{StaticResource OnStatus}" CornerRadius="8"
+                                IsVisible="False" Clicked="OnCompartirZipClicked" />
+                        
+                    </HorizontalStackLayout>
+                </ScrollView>
             </Grid>
 
             <!-- ============ LISTA DE LOTES (carpetas) ============ -->
