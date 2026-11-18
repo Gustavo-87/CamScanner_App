@@ -30,9 +30,9 @@ La siguiente tabla refleja las funcionalidades identificadas en el código fuent
 | Edición del texto reconocido | Implementada |
 | Copia de texto al portapapeles | Implementada |
 | Compartir imágenes | Implementado |
-| Exportación a Excel | Pendiente |
+| Exportación a Excel | Implementada: individual y consolidada por lote, verificada en Android |
 
-**Estado de validación:** las pruebas automatizadas disponibles registran 29 pruebas aprobadas, 0 fallidas y 0 omitidas. Estas pruebas corresponden a los componentes de almacenamiento de imágenes y validación de nombres. No representan una validación integral de todas las funcionalidades de la aplicación.
+**Estado de validación:** la última ejecución local registró 65 pruebas aprobadas, 0 fallidas y 0 omitidas. Las pruebas incluyen almacenamiento, validación de nombres, SQLite y exportaciones Excel y ZIP. No representan una validación integral de todas las funcionalidades de la aplicación.
 
 La compilación Android requiere configurar el Android SDK en el entorno de desarrollo. En la última verificación se obtuvo el error XA5300 por ausencia de dicha configuración.
 
@@ -184,7 +184,7 @@ El seguimiento de actividades, asignación de responsabilidades y organización 
 
 La versión documentada contiene funcionalidades para la captura e importación de imágenes, organización mediante lotes, almacenamiento local, gestión de documentos y reconocimiento de texto mediante OCR.
 
-La exportación a Excel continúa pendiente de implementación.
+La exportación individual y consolidada a Excel está implementada y fue verificada en una tableta Android.
 
 Los resultados de las pruebas automatizadas no sustituyen las pruebas funcionales de aceptación. La verificación en dispositivos Android y la validación integral de los flujos de negocio deben respaldarse con sus respectivas evidencias.
 

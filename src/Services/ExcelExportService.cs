@@ -38,13 +38,13 @@ public class ExcelExportService
 
             hoja.Cell(1, 1).Value = "Lote";
             hoja.Cell(1, 2).Value = lote.Nombre;
-            hoja.Cell(2, 1).Value = "DescripciÛn";
-            hoja.Cell(2, 2).Value = lote.Descripcion ?? "Sin descripciÛn";
+            hoja.Cell(2, 1).Value = "Descripci√≥n";
+            hoja.Cell(2, 2).Value = lote.Descripcion ?? "Sin descripci√≥n";
             hoja.Range(1, 1, 2, 1).Style.Font.Bold = true;
 
             var encabezados = new[]
             {
-                "Õndice", "ID original", "Documento", "Lote", "Fecha", "Texto OCR"
+                "√çndice", "ID original", "Documento", "Lote", "Fecha", "Texto OCR"
             };
 
             const int filaEncabezado = 4;

@@ -4,7 +4,25 @@
 **Fecha de actualización:** 17 de noviembre de 2026\
 **Rama revisada:** `documentacion-richard`
 
-## 1. Objetivo
+## Actualización de integración — 17 de noviembre de 2026
+
+Esta actualización complementa la revisión documental de Richard Prado con verificaciones posteriores realizadas durante la integración.
+
+- **Pruebas automatizadas:** 65 ejecutadas, 65 aprobadas, 0 fallidas y 0 omitidas.
+- **Excel:** exportación individual y consolidada por lote implementadas; verificadas en tableta Android.
+- **SQLite:** existen nuevas pruebas automatizadas de la capa de datos.
+- **ZIP:** se incorporó un servicio de exportación y pruebas automatizadas; su funcionamiento en Android requiere validación funcional específica.
+- **Compilación Android:** exitosa en el entorno macOS de integración. El error `XA5300` corresponde al entorno de desarrollo reportado por Richard.
+- **OCR:** integrado; la validación funcional completa y sin conexión sigue pendiente de evidencia suficiente.
+
+Los resultados automatizados no equivalen a la aprobación de todos los casos de aceptación CP-01 a CP-32.
+
+---
+
+
+**Proyecto:** CamScanner · Ingeniería de Software II (2026-2)\
+**Fecha de actualización:** 17 de noviembre de 2026\
+**Rama revisada:** `documentacion-richard`
 
 Evaluar el estado comprobable de CamScanner a partir de la revisión del
 código fuente, las dependencias, la documentación y los resultados de
@@ -97,9 +115,8 @@ automatizada parcial, no una certificación integral del producto.
   Compartir imagen        Uso de `Share.Default.RequestAsync`.        Implementación
                                                                       identificada.
 
-  Exportación Excel       Los manejadores muestran mensajes de        Pendiente de
-                          próxima disponibilidad; no se identifica    implementación.
-                          biblioteca Excel.
+  Exportación Excel       Servicio ClosedXML; exportación             Implementada y
+                          individual y por lote.                     probada en Android.
   -------------------------------------------------------------------------------------------
 
 ### 3.2. Dependencias identificadas
@@ -162,7 +179,7 @@ Normalización de mayúsculas y espacios. - Validación de listas vacías. -
 Detección de nombres vacíos y duplicados. - Validación de nombres
 únicos.
 
-Las 29 pruebas aprobadas corresponden a los componentes automatizados
+En la revisión inicial de Richard, las 29 pruebas aprobadas correspondían a los componentes automatizados
 indicados. No demuestran por sí solas el funcionamiento de la cámara,
 OCR, interfaz MAUI, base de datos SQLite, exportación Excel ni
 compatibilidad en dispositivos.
@@ -200,11 +217,9 @@ clasifica como defecto funcional confirmado del producto.
   -----------------------------------------------------------------------
   Característica          Estado observado        Acción recomendada
   ----------------------- ----------------------- -----------------------
-  Adecuación funcional    Existen flujos de       Completar Excel y
-                          lotes, documentos,      ejecutar pruebas de
-                          imágenes y OCR en el    aceptación.
-                          código; Excel está
-                          pendiente.
+  Adecuación funcional    Lotes, documentos,     Ampliar pruebas de
+                          imágenes, OCR y         aceptación, especialmente
+                          Excel implementados.    OCR y exportación ZIP.
 
   Eficiencia de desempeño No hay mediciones de    Medir tiempos y consumo
                           OCR ni tiempos de       en dispositivos
@@ -282,12 +297,10 @@ clasifica como defecto funcional confirmado del producto.
                  validaciones de                                    referencial.
                  aplicación.
 
-  R-06           La exportación Excel Alta           Alto           Seleccionar
-                 aún no está                                        biblioteca,
-                 implementada.                                      implementar y probar
-                                                                    exportación
-                                                                    individual y por
-                                                                    lote.
+  R-06           La exportación Excel Baja           Medio          Ampliar pruebas de
+                 está implementada,                               aceptación con
+                 pero requiere más                                diferentes documentos
+                 escenarios de prueba.                            y lotes.
 
   R-07           No hay evidencia     Alta           Alto           Ejecutar casos con
                  funcional de OCR en                                imágenes de
@@ -402,13 +415,12 @@ La relación documental está establecida, pero no se cuenta con
 resultados individuales para declarar aprobados los casos funcionales y
 no funcionales.
 
-Las 29 pruebas automatizadas se registran de forma independiente y no
+Las 29 pruebas de la revisión inicial se registraron de forma independiente y no
 deben sumarse como casos de aceptación aprobados.
 
 ## 10. Acciones de mejora priorizadas
 
-1.  Configurar el Android SDK y repetir la compilación para
-    `net10.0-android`.
+1.  Mantener la compilación Android verificada y documentar los entornos utilizados.
 2.  Instalar y ejecutar la aplicación en un dispositivo o emulador
     Android compatible.
 3.  Validar captura e importación, incluyendo permisos y cancelaciones.
@@ -417,9 +429,8 @@ deben sumarse como casos de aceptación aprobados.
 5.  Validar edición y persistencia del texto reconocido.
 6.  Probar el CRUD de lotes y documentos, incluyendo integridad de
     asociaciones.
-7.  Implementar la exportación individual y por lote a Excel.
-8.  Ampliar pruebas automatizadas para la capa de datos y reglas de
-    negocio.
+7.  Ampliar las pruebas funcionales de exportación Excel individual y por lote.
+8.  Mantener y ampliar las pruebas automatizadas de SQLite, Excel, ZIP y reglas de negocio.
 9.  Ejecutar los casos CP-01 a CP-32 que correspondan y registrar fecha,
     entorno, resultado y evidencia.
 10. Registrar defectos reproducibles y vincularlos con requisitos y
@@ -428,30 +439,14 @@ deben sumarse como casos de aceptación aprobados.
 
 ## 11. Conclusión
 
-La revisión del 17 de noviembre de 2026 identifica una versión más
-avanzada que la descrita en el informe anterior. El código incluye
-gestión de lotes y documentos, captura e importación de imágenes,
-almacenamiento local, integración OCR, edición de texto, copia al
-portapapeles y uso de funciones para compartir imágenes.
+CamScanner incorpora gestión de lotes y documentos, captura e importación de imágenes, persistencia SQLite, integración OCR, edición de texto y exportaciones Excel y ZIP.
 
-La exportación Excel permanece pendiente. La integración OCR está
-identificada en el código, pero su comportamiento debe validarse
-funcionalmente en dispositivos. La capa de datos contiene operaciones
-para lotes y documentos y validaciones para evitar eliminar lotes que
-tengan documentos asociados.
+La exportación Excel individual y consolidada por lote fue implementada y verificada en una tableta Android. La exportación ZIP cuenta con implementación y pruebas automatizadas, pero requiere validación funcional específica en dispositivo.
 
-Las pruebas automatizadas reportaron 29 aprobadas, 0 fallidas y 0
-omitidas. Su cobertura corresponde a almacenamiento de imágenes y
-validación de nombres, por lo que no certifica el funcionamiento
-integral de la aplicación.
+Durante la integración del 17 de noviembre de 2026 se ejecutaron 65 pruebas automatizadas: 65 aprobadas, 0 fallidas y 0 omitidas. Estas incluyen pruebas de almacenamiento, validación de nombres, SQLite y exportaciones.
 
-La compilación Android no pudo completarse debido al error XA5300 por
-ausencia o falta de configuración del Android SDK en el entorno
-reportado. No se recibió un reporte adicional de resultados funcionales
-de Javier ni evidencias individuales para los casos de aceptación.
+La compilación Android se realizó correctamente en el entorno macOS de integración. El error XA5300 documentado corresponde al entorno de desarrollo de Richard y no representa un defecto confirmado de la aplicación.
 
-En consecuencia, CamScanner presenta una implementación parcial avanzada
-respecto al alcance definido. Antes de declarar la entrega
-funcionalmente validada, se requiere configurar el entorno Android,
-ejecutar pruebas en dispositivo, verificar OCR, completar Excel y
-registrar las evidencias y defectos correspondientes.
+Permanecen pendientes las evidencias suficientes para declarar completamente validado el OCR sin conexión y los casos de aceptación funcional que no hayan sido ejecutados.
+
+En consecuencia, CamScanner presenta avances funcionales comprobados, aunque la aprobación integral de calidad requiere completar las pruebas de aceptación y registrar sus respectivas evidencias.
