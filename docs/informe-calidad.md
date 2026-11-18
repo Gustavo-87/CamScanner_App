@@ -1,212 +1,450 @@
-# Informe de calidad — CamScanner
+# Informe de calidad --- CamScanner
+
+**Proyecto:** CamScanner · Ingeniería de Software II (2026-2)\
+**Fecha de actualización:** 17 de noviembre de 2026\
+**Rama revisada:** `documentacion-richard`
+
+## Actualización de integración — 17 de noviembre de 2026
+
+Esta actualización complementa la revisión documental de Richard Prado con verificaciones posteriores realizadas durante la integración.
+
+- **Pruebas automatizadas:** 65 ejecutadas, 65 aprobadas, 0 fallidas y 0 omitidas.
+- **Excel:** exportación individual y consolidada por lote implementadas; verificadas en tableta Android.
+- **SQLite:** existen nuevas pruebas automatizadas de la capa de datos.
+- **ZIP:** se incorporó un servicio de exportación y pruebas automatizadas; su funcionamiento en Android requiere validación funcional específica.
+- **Compilación Android:** exitosa en el entorno macOS de integración. El error `XA5300` corresponde al entorno de desarrollo reportado por Richard.
+- **OCR:** integrado; la validación funcional completa y sin conexión sigue pendiente de evidencia suficiente.
+
+Los resultados automatizados no equivalen a la aprobación de todos los casos de aceptación CP-01 a CP-32.
+
+---
+
 
 ## 1. Objetivo
 
-Identificar el estado comprobable del producto, los riesgos técnicos y los aspectos de calidad que deben atenderse durante el desarrollo y la verificación de CamScanner, mediante revisión estática del código fuente, documentación y resultados de compilación.
+Evaluar el estado comprobable de CamScanner a partir de la revisión del
+código fuente, las dependencias, la documentación y los resultados de
+pruebas automatizadas y compilación disponibles. El informe diferencia
+la implementación identificada de la validación funcional efectivamente
+ejecutada.
 
-## 2. Alcance y limitaciones de la revisión
+## 2. Alcance y limitaciones
 
-Se revisaron los siguientes archivos del proyecto:
+Se revisaron los archivos y componentes compartidos de la versión
+actual:
 
-- `src/CamScanner.csproj`
-- `src/Models/Documento.cs`
-- `src/Models/Lote.cs`
-- `src/Data/CamScannerDatabase.cs`
-- `src/MainPage.xaml`
-- `src/MainPage.xaml.cs`
-- `src/MauiProgram.cs`
-- `src/App.xaml`
-- `src/AppShell.xaml`
-- `src/Platforms/Android/AndroidManifest.xml`
-- `docs/especificacion.md`
-- `docs/plan-de-pruebas.md`
+-   `src/CamScanner.csproj`
+-   `src/MainPage.xaml` y `src/MainPage.xaml.cs`
+-   `src/DetallePage.xaml` y `src/DetallePage.xaml.cs`
+-   `src/TextoPage.xaml` y `src/TextoPage.xaml.cs`
+-   `src/Data/CamScannerDatabase.cs`
+-   `src/Models/Documento.cs`
+-   `src/Models/Lote.cs`
+-   `src/Services/AlmacenImagenes.cs`
+-   `src/Services/ValidadorNombres.cs`
+-   `tests/CamScanner.Tests/AlmacenImagenesTests.cs`
+-   `tests/CamScanner.Tests/ValidadorNombresTests.cs`
+-   `docs/especificacion.md`
+-   `docs/plan-de-pruebas.md`
 
-También se realizó una búsqueda de referencias a OCR, cámara, selección de archivos y Excel dentro de `src`, excluyendo las carpetas `bin` y `obj`.
+También se consideraron las salidas de `dotnet test` y `dotnet build`
+compartidas el 17 de noviembre de 2026.
 
-La revisión incluye los resultados de restauración y compilación obtenidos con .NET SDK 10.0.403 y la carga de trabajo MAUI 10.0.110.
+**Limitaciones de la evaluación:** - No se recibió un reporte adicional
+de resultados funcionales de Javier. - No se aportaron evidencias
+individuales de ejecución de los casos CP-01 a CP-32. - La compilación
+Android no se completó por falta de configuración del Android SDK. - No
+se confirmó mediante prueba en dispositivo el comportamiento del OCR,
+cámara, galería o persistencia. - No se implementó ni verificó la
+exportación Excel. - La revisión de código no sustituye pruebas de
+aceptación ni una evaluación integral de calidad.
 
-**Limitaciones:**
-
-- No se completaron pruebas funcionales en un dispositivo Android.
-- No se verificó el comportamiento de la aplicación durante su ejecución.
-- No se midió el rendimiento del OCR ni de la exportación.
-- No se aportaron evidencias de pruebas automatizadas.
-- La revisión estática no demuestra por sí sola que una funcionalidad esté ausente de todos los archivos del proyecto.
-
-Por lo tanto, los resultados representan un diagnóstico del estado comprobable y no una certificación integral de calidad.
+Por tanto, este informe representa una evaluación técnica documental y
+automatizada parcial, no una certificación integral del producto.
 
 ## 3. Estado técnico comprobado
 
-### 3.1. Revisión del código fuente
+### 3.1. Funcionalidades identificadas en el código
 
-| Área | Evidencia | Resultado |
-|---|---|---|
-| Plataforma | `.csproj` declara `net10.0-android` y `UseMaui=true`. | Configuración inicial presente. |
-| Dependencias | Se declara `sqlite-net-pcl` versión 1.11.285. | Dependencia SQLite presente. |
-| Modelo Lote | Contiene Id, Nombre, FechaCreacion y Descripcion. | Implementado. |
-| Modelo Documento | Contiene Id, LoteId, Nombre, RutaImagen, TextoExtraido y FechaCreacion. | Implementado. |
-| Inicialización SQLite | `InitAsync()` crea las tablas `Lote` y `Documento`. | Implementada en código. |
-| Consulta de lotes | `ObtenerLotesAsync()`. | Implementada en código. |
-| Guardado de lotes | `GuardarLoteAsync()` realiza inserción o actualización según el Id. | Implementado en código. |
-| Eliminación de lotes | No se identificó un método de eliminación en la clase revisada. | No evidenciado. |
-| Gestión de documentos | No se identificaron métodos para insertar, consultar, actualizar o eliminar documentos. | No evidenciada. |
-| Relación lote-documento | `Documento` contiene `LoteId` con atributo `[Indexed]`. | Índice presente; no se evidencia clave foránea. |
-| Interfaz | La pantalla principal muestra «Hello, World!» y un contador. | Interfaz de negocio no evidenciada. |
-| OCR, cámara e importación | La búsqueda de referencias no encontró implementaciones en los archivos revisados. | No evidenciados. |
-| Exportación Excel | No se encontraron referencias ni dependencias de Excel en el archivo de proyecto revisado. | No evidenciada. |
-| Pruebas automatizadas | No se identificó una carpeta de pruebas en el listado versionado compartido. | No evidenciadas en ese listado. |
+  -------------------------------------------------------------------------------------------
+  Área                    Evidencia revisada                          Evaluación
+  ----------------------- ------------------------------------------- -----------------------
+  Plataforma              `CamScanner.csproj` declara .NET 10 y MAUI. Configuración presente.
 
-### 3.2. Resultados de restauración y compilación
+  Dependencias            `sqlite-net-pcl` 1.11.285 y                 Dependencias
+                          `Plugin.Maui.OCR` 1.1.1.                    declaradas.
 
-Se realizaron las siguientes verificaciones:
+  Gestión de lotes        `MainPage.xaml.cs` permite crear,           Implementación
+                          consultar, editar y solicitar eliminación.  identificada.
 
-| Verificación | Resultado | Observación |
-|---|---|---|
-| `dotnet --list-sdks` | Aprobado | SDK 10.0.403 instalado. |
-| Instalación de carga MAUI | Aprobado | Carga MAUI instalada correctamente. |
-| `dotnet restore src/CamScanner.csproj` | Aprobado | Restauración completada. |
-| Compilación Android | Fallida | Error XA5300: no se encontró el directorio Android SDK. |
-| Compilación iOS Simulator | Aprobada | Compilación completada. |
-| Compilación MacCatalyst | Aprobada | Compilación completada. |
-| Compilación Windows | Aprobada | Compilación completada. |
-| Compilación individual Windows | Aprobada | `net10.0-windows10.0.19041.0` compiló correctamente. |
-| Ejecución mediante `-t:Run` | No completada | Se produjo el error MSB3073, código de salida 9009. |
+  Integridad de lotes     `EliminarLoteAsync` comprueba si existen    Validación de negocio
+                          documentos asociados antes de eliminar.     presente.
 
-**Interpretación de resultados:**
+  Captura                 Uso de                                      Implementación
+                          `MediaPicker.Default.CapturePhotoAsync()` y identificada.
+                          solicitud de permiso de cámara.
 
-La compilación multi-target obtuvo tres destinos compilados correctamente de cuatro intentados. Android no pudo compilar debido a la configuración del entorno de desarrollo, específicamente la ausencia del Android SDK.
+  Importación             Uso de `PickPhotosAsync`, con límite de     Implementación
+                          selección de 10 imágenes.                   identificada.
 
-La compilación satisfactoria de Windows demuestra que el proyecto puede generarse para ese destino, pero no confirma que sus funcionalidades operen correctamente.
+  Almacenamiento de       Copia de archivos al directorio local de la Implementación
+  imágenes                aplicación.                                 identificada.
 
-La compilación de iOS y MacCatalyst tampoco equivale a una prueba de ejecución en esos sistemas operativos.
+  Gestión de documentos   Registro, consulta, actualización y         Implementación
+                          eliminación en `CamScannerDatabase`.        identificada.
 
-El intento de ejecución con `-t:Run` no se completó y requiere diagnóstico adicional.
+  Relación lote-documento El documento almacena `LoteId`; el registro Validación en código;
+                          valida que el lote exista.                  no se demuestra clave
+                                                                      foránea SQLite.
 
-### 3.3. Diagnóstico de la capa de datos
+  Visualización           `DetallePage` muestra la imagen asociada al Implementación
+                          documento.                                  identificada.
 
-La clase `CamScannerDatabase` inicializa una base de datos local en `FileSystem.AppDataDirectory` con el nombre `camscanner.db3`.
+  OCR                     `OcrPlugin.Default.InitAsync()` y           Integración
+                          `RecognizeTextAsync(bytes)`.                identificada; ejecución
+                                                                      funcional pendiente.
 
-Se identificaron estas operaciones:
+  Edición de texto        `TextoPage` permite editar y guardar el     Implementación
+                          texto reconocido.                           identificada.
 
-- Creación de la tabla `Lote`.
-- Creación de la tabla `Documento`.
-- Consulta de todos los lotes.
-- Inserción de un lote nuevo.
-- Actualización de un lote existente.
+  Copiar texto            Uso de `Clipboard.Default.SetTextAsync`.    Implementación
+                                                                      identificada.
 
-No se identificaron métodos de gestión de documentos ni operaciones de eliminación.
+  Compartir imagen        Uso de `Share.Default.RequestAsync`.        Implementación
+                                                                      identificada.
 
-Aunque `Documento` tiene un campo `LoteId` marcado como índice, esto no constituye por sí solo una relación de clave foránea ni garantiza que no existan documentos asociados a un lote eliminado.
+  Exportación Excel       Servicio ClosedXML; exportación             Implementada y
+                          individual y por lote.                     probada en Android.
+  -------------------------------------------------------------------------------------------
 
-## 4. Evaluación por características de calidad
+### 3.2. Dependencias identificadas
 
-| Característica | Situación observada | Acción recomendada |
-|---|---|---|
-| Adecuación funcional | Interfaz de plantilla y persistencia parcial de lotes. | Implementar y verificar los flujos funcionales del alcance. |
-| Eficiencia de desempeño | Sin mediciones de OCR, procesamiento de imágenes o exportación. | Medir tiempos y consumo cuando se incorporen esas funciones. |
-| Compatibilidad | Se declara Android y existen otros destinos de compilación. Android no pudo compilar en el entorno revisado. | Configurar Android SDK y probar en dispositivos compatibles. |
-| Usabilidad | La pantalla inspeccionada conserva la plantilla inicial de MAUI. | Diseñar y evaluar las pantallas de captura, revisión, lotes y exportación. |
-| Confiabilidad | Capa de datos limitada y sin pruebas de recuperación aportadas. | Incorporar manejo de excepciones y pruebas de persistencia e integridad. |
-| Seguridad y privacidad | La base local utiliza `FileSystem.AppDataDirectory`. No se evidenció el flujo completo de protección de documentos. | Revisar permisos, almacenamiento y tratamiento de datos. |
-| Mantenibilidad | Existe separación inicial entre modelos, datos e interfaz. | Mantener responsabilidades separadas e incorporar servicios específicos. |
-| Portabilidad | El proyecto declara varios destinos condicionados en el archivo de proyecto. | Priorizar Android y documentar las plataformas efectivamente verificadas. |
+  --------------------------------------------------------------------------------------
+  Dependencia                            Versión declarada       Uso
+  -------------------------------------- ----------------------- -----------------------
+  `Microsoft.Maui.Controls`              `$(MauiVersion)`        Interfaz MAUI
 
-## 5. Riesgos identificados
+  `Microsoft.Extensions.Logging.Debug`   10.0.0                  Registro de depuración
 
-Las valoraciones son preliminares y deben revisarse cuando se ejecuten pruebas funcionales.
+  `Plugin.Maui.OCR`                      1.1.1                   Reconocimiento de texto
 
-| ID | Riesgo | Probabilidad | Impacto | Acción recomendada |
-|---|---|---|---|---|
-| R-01 | Imágenes borrosas, inclinadas u oscuras pueden reducir la precisión del OCR. | Alta | Alto | Probar condiciones variadas, permitir corrección manual y comunicar resultados parciales. |
-| R-02 | El OCR local puede consumir recursos elevados en dispositivos limitados. | Media | Alto | Medir consumo y tiempo de procesamiento y evitar bloquear la interfaz. |
-| R-03 | Permisos denegados o archivos incompatibles pueden impedir captura e importación. | Media | Medio | Validar permisos y formatos y mostrar mensajes claros. |
-| R-04 | La capa SQLite no expone el CRUD completo requerido. | Alta | Alto | Completar las operaciones para lotes y documentos y probarlas. |
-| R-05 | Las eliminaciones pueden dejar relaciones lote-documento inconsistentes. | Media | Alto | Definir integridad referencial y probar lotes con documentos asociados. |
-| R-06 | La interfaz actual no ofrece los flujos de negocio previstos. | Alta | Alto | Implementar pantallas de captura, revisión, lotes y exportación. |
-| R-07 | La exportación puede generar archivos incompletos o desordenados. | Media | Alto | Definir la estructura del Excel y validar exportaciones individuales y por lote. |
-| R-08 | La ausencia de pruebas automatizadas visibles dificulta detectar regresiones. | Media | Alto | Crear un proyecto de pruebas y automatizar validaciones de modelos y persistencia. |
-| R-09 | La configuración de permisos Android puede no cubrir las capacidades futuras. | Media | Medio | Revisar el manifiesto y los permisos en tiempo de ejecución. |
-| R-10 | Las dependencias OCR y Excel pueden presentar incompatibilidades o restricciones de licencia. | Media | Medio | Evaluar versiones, compatibilidad y licencias antes de integrarlas. |
-| R-11 | La ausencia del Android SDK en el entorno impide verificar la compilación Android. | Alta | Medio | Instalar y configurar Android SDK y repetir la compilación. |
+  `sqlite-net-pcl`                       1.11.285                Persistencia SQLite
+  --------------------------------------------------------------------------------------
 
-## 6. Métricas y resultados de verificación
+### 3.3. Capa de datos
 
-### 6.1. Métricas de compilación
+La clase `CamScannerDatabase` inicializa `camscanner.db3` dentro de
+`FileSystem.AppDataDirectory` y crea las tablas `Lote` y `Documento`.
 
-| Métrica | Resultado |
-|---|---|
-| SDK instalado | .NET 10.0.403 |
-| Carga MAUI | 10.0.110 |
-| Restauración de dependencias | Correcta |
-| Destinos compilados en la prueba multi-target | 3 de 4 |
-| Destinos fallidos en la prueba multi-target | 1 de 4 |
-| Compilación individual Windows | Correcta |
-| Ejecución funcional de la aplicación | No completada |
+Se identifican operaciones para: - consultar lotes; - insertar o
+actualizar lotes; - guardar documentos con validación de existencia del
+lote; - consultar documentos; - consultar documentos por lote; -
+eliminar documentos; - impedir la eliminación de lotes que tengan
+documentos asociados.
 
-El porcentaje de destinos compilados correctamente en la prueba multi-target fue:
+La relación se controla mediante el identificador `LoteId` y consultas
+de aplicación. La revisión no demuestra una restricción de clave foránea
+declarada en SQLite.
 
-\[
-\frac{3}{4}\times100=75\%
-\]
+## 4. Resultados de pruebas automatizadas
 
-Este porcentaje corresponde exclusivamente a los destinos de compilación intentados. No representa el porcentaje de requisitos funcionales implementados ni el porcentaje de pruebas funcionales aprobadas.
+El 17 de noviembre de 2026 se ejecutó:
 
-### 6.2. Métricas funcionales pendientes
+``` powershell
+dotnet test .\tests\CamScanner.Tests\CamScanner.Tests.csproj
+```
 
-No se suministraron resultados de ejecución funcional. Se deben recopilar:
+Resultado reportado:
 
-- Porcentaje de requisitos probados: requisitos con pruebas ejecutadas / requisitos totales × 100.
-- Porcentaje de pruebas aprobadas: casos aprobados / casos ejecutados × 100.
-- Tiempo de OCR y exportación en dispositivos identificados.
-- Exactitud del OCR comparando resultados con transcripciones de referencia.
-- Persistencia después de cerrar y abrir la aplicación.
-- Defectos por severidad.
-- Compatibilidad por modelo y versión Android.
+  Métrica                                 Resultado
+  ------------------------------------- -----------
+  Pruebas ejecutadas                             29
+  Aprobadas                                      29
+  Fallidas                                        0
+  Omitidas                                        0
+  Compilación del proyecto de pruebas      Correcta
 
-Los umbrales de aceptación deben acordarse antes de interpretar las mediciones.
+### 4.1. Cobertura identificada
 
-## 7. Hallazgos de revisión
+**AlmacenImagenesTests** - Copia de contenido. - Manejo de
+extensiones. - Creación de directorios. - Generación de rutas únicas. -
+Manejo de errores durante la copia. - Eliminación de archivos. -
+Tratamiento de rutas vacías o archivos inexistentes.
 
-Los siguientes hallazgos corresponden a revisión estática y verificación de compilación. No deben confundirse con defectos confirmados mediante pruebas funcionales.
+**ValidadorNombresTests** - Generación de nombres consecutivos. - Manejo
+de consecutivos inválidos. - Búsqueda del siguiente nombre disponible. -
+Normalización de mayúsculas y espacios. - Validación de listas vacías. -
+Detección de nombres vacíos y duplicados. - Validación de nombres
+únicos.
 
-| ID | Hallazgo | Severidad sugerida | Estado | Evidencia |
-|---|---|---|---|---|
-| H-01 | La pantalla principal conserva la plantilla inicial de MAUI. | Alta | Abierto | `MainPage.xaml` y `MainPage.xaml.cs`. |
-| H-02 | La capa de datos revisada solo consulta e inserta/actualiza lotes. | Alta | Abierto | `CamScannerDatabase.cs`. |
-| H-03 | No se encontraron referencias a OCR, cámara, selección de archivos o Excel en la búsqueda realizada. | Alta | Abierto | Búsqueda en `src`. |
-| H-04 | No se identificó una carpeta de pruebas en el listado versionado compartido. | Media | Abierto | Salida de `git ls-files`. |
-| H-05 | El campo `LoteId` está indexado, pero no se evidencia una regla de clave foránea en el modelo revisado. | Media | Abierto | `Documento.cs`. |
-| H-06 | La compilación Android no pudo completarse por falta del Android SDK. | Media | Pendiente | Error XA5300 durante `dotnet build`. |
-| H-07 | El intento de ejecución con `-t:Run` no se completó. | Media | Pendiente de diagnóstico | Error MSB3073, código 9009. |
+En la revisión inicial de Richard, las 29 pruebas aprobadas correspondían a los componentes automatizados
+indicados. No demuestran por sí solas el funcionamiento de la cámara,
+OCR, interfaz MAUI, base de datos SQLite, exportación Excel ni
+compatibilidad en dispositivos.
 
-### 7.1. Clasificación de los hallazgos
+## 5. Resultados de compilación
 
-- **Hallazgos del producto:** H-01 a H-05.
-- **Incidencias del entorno o de verificación:** H-06 y H-07.
+Se ejecutó:
 
-La ausencia del Android SDK corresponde a una limitación del entorno de pruebas, no a un defecto funcional demostrado del producto.
+``` powershell
+dotnet build .\src\CamScanner.csproj -f net10.0-android
+```
 
-## 8. Acciones de mejora
+Resultado: compilación no completada.
 
-1. Sustituir la interfaz de plantilla por los flujos de negocio de CamScanner.
-2. Completar las operaciones CRUD para lotes y documentos.
-3. Definir y aplicar reglas de integridad para la relación entre lotes y documentos.
-4. Incorporar captura e importación de imágenes con los permisos Android correspondientes.
-5. Seleccionar e integrar una solución de OCR local y documentar su paquete y versión.
-6. Incorporar selección y edición del texto reconocido.
-7. Seleccionar e integrar una biblioteca para exportación Excel.
-8. Crear pruebas automatizadas para modelos y persistencia.
-9. Configurar el Android SDK y repetir la compilación Android.
-10. Diagnosticar el error de ejecución MSB3073 y verificar la aplicación en un entorno compatible.
-11. Ejecutar los casos del plan de pruebas y adjuntar evidencias reales.
-12. Actualizar los estados de los requisitos y hallazgos conforme se obtengan resultados.
+**Error reportado:** `XA5300`, no se encontró el directorio Android SDK.
 
-## 9. Conclusión
+  -----------------------------------------------------------------------
+  Verificación                        Resultado
+  ----------------------------------- -----------------------------------
+  Ejecución de pruebas automatizadas  Correcta
 
-La revisión confirma que CamScanner cuenta con una estructura inicial desarrollada en .NET MAUI, modelos para lotes y documentos y una infraestructura básica de persistencia SQLite. Se identificaron operaciones para crear las tablas, consultar lotes e insertar o actualizar lotes.
+  Compilación del proyecto de pruebas Correcta
 
-Sin embargo, la interfaz principal conserva elementos de la plantilla inicial de MAUI y no se evidenció la integración de las funcionalidades centrales de digitalización, captura, importación, OCR y exportación Excel en los archivos revisados. Tampoco se identificó la gestión CRUD completa de documentos.
+  Compilación Android en el entorno   Fallida por Android SDK no
+  reportado                           localizado
 
-En las verificaciones técnicas, la restauración de dependencias fue satisfactoria y la compilación de Windows, iOS Simulator y MacCatalyst finalizó correctamente. La compilación Android quedó bloqueada por la ausencia del Android SDK. La ejecución de la aplicación tampoco pudo completarse mediante el objetivo `Run`.
+  Ejecución funcional Android         No demostrada mediante esta salida
+  -----------------------------------------------------------------------
 
-En consecuencia, el proyecto presenta una implementación parcial respecto al alcance definido en la especificación. Se recomienda priorizar la implementación de las funcionalidades pendientes, completar la configuración del entorno Android y ejecutar los casos del plan de pruebas antes de emitir una valoración definitiva sobre la calidad funcional del producto.
+La incidencia XA5300 corresponde a la configuración del entorno. No se
+clasifica como defecto funcional confirmado del producto.
+
+## 6. Evaluación de características de calidad
+
+  -----------------------------------------------------------------------
+  Característica          Estado observado        Acción recomendada
+  ----------------------- ----------------------- -----------------------
+  Adecuación funcional    Lotes, documentos,     Ampliar pruebas de
+                          imágenes, OCR y         aceptación, especialmente
+                          Excel implementados.    OCR y exportación ZIP.
+
+  Eficiencia de desempeño No hay mediciones de    Medir tiempos y consumo
+                          OCR ni tiempos de       en dispositivos
+                          procesamiento.          objetivo.
+
+  Compatibilidad          El proyecto declara     Configurar Android SDK
+                          Android y otros         y validar en
+                          destinos; Android no    dispositivos.
+                          compiló en el entorno
+                          reportado.
+
+  Usabilidad              Existen pantallas y     Ejecutar pruebas de
+                          acciones de negocio. No navegación y
+                          se aportó evaluación de comprensión.
+                          usuarios.
+
+  Confiabilidad           Hay manejo de errores   Ampliar pruebas de
+                          en varios flujos y      persistencia, permisos
+                          pruebas unitarias de    e interrupciones.
+                          servicios.
+
+  Seguridad y privacidad  Se utiliza              Revisar permisos,
+                          almacenamiento local de almacenamiento y
+                          aplicación; no se       tratamiento de
+                          realizó auditoría       imágenes.
+                          completa.
+
+  Mantenibilidad          Hay separación entre    Mantener
+                          páginas, modelos, datos responsabilidades
+                          y servicios.            separadas y ampliar
+                                                  pruebas.
+
+  Portabilidad            Se declaran varios      Verificar cada
+                          destinos de plataforma. plataforma antes de
+                                                  afirmar compatibilidad.
+
+  Integridad              Se comprueba la         Probar escenarios
+                          existencia del lote al  límite y consistencia
+                          guardar documentos y se de archivos y
+                          bloquea eliminar lotes  registros.
+                          con documentos.
+  -----------------------------------------------------------------------
+
+## 7. Riesgos identificados
+
+  ---------------------------------------------------------------------------------------
+  ID             Riesgo               Probabilidad   Impacto        Acción recomendada
+  -------------- -------------------- -------------- -------------- ---------------------
+  R-01           Imágenes borrosas,   Alta           Alto           Probar condiciones
+                 inclinadas u oscuras                               variadas y permitir
+                 pueden reducir la                                  corrección manual.
+                 precisión del OCR.
+
+  R-02           El OCR local puede   Media          Alto           Medir consumo y
+                 consumir recursos                                  tiempo de
+                 elevados en                                        procesamiento.
+                 dispositivos
+                 limitados.
+
+  R-03           Permisos denegados o Media          Medio          Validar permisos y
+                 archivos                                           formatos en
+                 incompatibles pueden                               dispositivo.
+                 impedir captura e
+                 importación.
+
+  R-04           Las operaciones      Media          Alto           Ampliar pruebas de
+                 SQLite pueden                                      persistencia y CRUD.
+                 presentar errores no
+                 detectados por las
+                 pruebas actuales.
+
+  R-05           La relación          Media          Alto           Probar integridad y
+                 lote-documento                                     definir si se
+                 depende de                                         requiere restricción
+                 validaciones de                                    referencial.
+                 aplicación.
+
+  R-06           La exportación Excel Baja           Medio          Ampliar pruebas de
+                 está implementada,                               aceptación con
+                 pero requiere más                                diferentes documentos
+                 escenarios de prueba.                            y lotes.
+
+  R-07           No hay evidencia     Alta           Alto           Ejecutar casos con
+                 funcional de OCR en                                imágenes de
+                 dispositivo.                                       referencia y
+                                                                    registrar resultados.
+
+  R-08           Las pruebas          Alta           Alto           Ampliar pruebas de
+                 automatizadas                                      datos y aceptación.
+                 actuales no cubren
+                 todos los flujos de
+                 negocio.
+
+  R-09           La configuración de  Media          Medio          Revisar manifiesto y
+                 permisos Android                                   permisos en tiempo de
+                 puede no cubrir                                    ejecución.
+                 todas las
+                 capacidades
+                 requeridas.
+
+  R-10           Dependencias OCR     Media          Medio          Verificar versiones,
+                 pueden presentar                                   compatibilidad y
+                 incompatibilidades                                 licencias.
+                 según dispositivo o
+                 plataforma.
+
+  R-11           La ausencia del      Alta           Medio          Instalar/configurar
+                 Android SDK impide                                 Android SDK y repetir
+                 verificar la                                       la compilación.
+                 compilación Android
+                 en el entorno
+                 reportado.
+  ---------------------------------------------------------------------------------------
+
+## 8. Hallazgos de calidad
+
+Los hallazgos siguientes se basan en revisión de código y resultados de
+herramientas. No todos representan defectos funcionales reproducidos.
+
+  -----------------------------------------------------------------------
+  ID                Hallazgo          Severidad         Estado
+                                      sugerida
+  ----------------- ----------------- ----------------- -----------------
+  H-01              La exportación    Alta              Pendiente de
+                    Excel muestra                       implementación
+                    mensajes de
+                    próxima
+                    disponibilidad y
+                    no cuenta con
+                    implementación
+                    identificada.
+
+  H-02              OCR integrado en  Alta              Pendiente de
+                    el código, pero                     validación
+                    sin evidencia de
+                    prueba funcional
+                    en dispositivo.
+
+  H-03              La compilación    Media             Incidencia de
+                    Android no se                       entorno pendiente
+                    completó por
+                    error XA5300.
+
+  H-04              Los 29 tests      Media             Ampliación
+                    automatizados                       recomendada
+                    cubren
+                    almacenamiento de
+                    imágenes y
+                    validación de
+                    nombres, no todos
+                    los flujos de
+                    negocio.
+
+  H-05              No se recibió     Media             Sin reporte
+                    reporte adicional                   disponible
+                    de resultados
+                    funcionales de
+                    Javier.
+
+  H-06              La relación       Media             Revisión técnica
+                    lote-documento se                   pendiente
+                    valida mediante
+                    lógica de
+                    aplicación; no se
+                    comprobó una
+                    clave foránea
+                    SQLite.
+
+  H-07              No se aportaron   Media             Pendiente de
+                    evidencias                          ejecución y
+                    individuales de                     registro
+                    ejecución de
+                    CP-01 a CP-32.
+  -----------------------------------------------------------------------
+
+### 8.1. Incidencias de entorno y defectos del producto
+
+-   **Incidencia de entorno:** H-03, por ausencia del Android SDK.
+-   **Pendientes de producto:** H-01, H-02 y H-06.
+-   **Pendientes de verificación/documentación:** H-04, H-05 y H-07.
+
+La ausencia de evidencia no debe interpretarse automáticamente como un
+defecto reproducido.
+
+## 9. Trazabilidad y estado de verificación
+
+La especificación contiene 18 requisitos funcionales y 10 requisitos no
+funcionales. El plan de pruebas relaciona los requisitos funcionales con
+los criterios CA-01 a CA-18 y con los casos CP-01 a CP-22; también
+asocia los requisitos no funcionales con CP-23 a CP-32.
+
+La relación documental está establecida, pero no se cuenta con
+resultados individuales para declarar aprobados los casos funcionales y
+no funcionales.
+
+Las 29 pruebas de la revisión inicial se registraron de forma independiente y no
+deben sumarse como casos de aceptación aprobados.
+
+## 10. Acciones de mejora priorizadas
+
+1.  Mantener la compilación Android verificada y documentar los entornos utilizados.
+2.  Instalar y ejecutar la aplicación en un dispositivo o emulador
+    Android compatible.
+3.  Validar captura e importación, incluyendo permisos y cancelaciones.
+4.  Ejecutar pruebas de OCR con imágenes de referencia y comprobar el
+    funcionamiento sin conexión.
+5.  Validar edición y persistencia del texto reconocido.
+6.  Probar el CRUD de lotes y documentos, incluyendo integridad de
+    asociaciones.
+7.  Ampliar las pruebas funcionales de exportación Excel individual y por lote.
+8.  Mantener y ampliar las pruebas automatizadas de SQLite, Excel, ZIP y reglas de negocio.
+9.  Ejecutar los casos CP-01 a CP-32 que correspondan y registrar fecha,
+    entorno, resultado y evidencia.
+10. Registrar defectos reproducibles y vincularlos con requisitos y
+    casos de prueba.
+11. Actualizar los estados documentales después de cada nueva ejecución.
+
+## 11. Conclusión
+
+CamScanner incorpora gestión de lotes y documentos, captura e importación de imágenes, persistencia SQLite, integración OCR, edición de texto y exportaciones Excel y ZIP.
+
+La exportación Excel individual y consolidada por lote fue implementada y verificada en una tableta Android. La exportación ZIP cuenta con implementación y pruebas automatizadas, pero requiere validación funcional específica en dispositivo.
+
+Durante la integración del 17 de noviembre de 2026 se ejecutaron 65 pruebas automatizadas: 65 aprobadas, 0 fallidas y 0 omitidas. Estas incluyen pruebas de almacenamiento, validación de nombres, SQLite y exportaciones.
+
+La compilación Android se realizó correctamente en el entorno macOS de integración. El error XA5300 documentado corresponde al entorno de desarrollo de Richard y no representa un defecto confirmado de la aplicación.
+
+Permanecen pendientes las evidencias suficientes para declarar completamente validado el OCR sin conexión y los casos de aceptación funcional que no hayan sido ejecutados.
+
+En consecuencia, CamScanner presenta avances funcionales comprobados, aunque la aprobación integral de calidad requiere completar las pruebas de aceptación y registrar sus respectivas evidencias.
