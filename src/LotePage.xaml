@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:CamScanner"
+             xmlns:models="clr-namespace:CamScanner.Models"
+             x:Class="CamScanner.LotePage"
+             x:DataType="local:LotePage">
+
+    <Grid RowDefinitions="Auto,*" Padding="8">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="6">
+            <Label Text="{Binding Resumen}"
+                   FontSize="13"
+                   TextColor="Gray"
+                   Margin="8,4,8,8" />
+
+            <Label Text="{Binding Descripcion}"
+                   FontSize="14"
+                   TextColor="Gray"
+                   LineBreakMode="WordWrap"
+                   Margin="8,0,8,4" />
+
+            <HorizontalStackLayout Spacing="8" Margin="8,0,8,8">
+                <Button Text="Compartir Excel"
+                        Clicked="OnExportarExcelClicked"
+                        HorizontalOptions="FillAndExpand" />
+                <Button Text="Guardar Excel"
+                        Clicked="OnGuardarExcelClicked"
+                        HorizontalOptions="FillAndExpand" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Fotos}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="3" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.EmptyView>
+                <Label Text="Este lote aún no tiene fotos"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       TextColor="Gray" />
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Documento">
+                    <Border Margin="4" Padding="0" StrokeThickness="0"
+                            StrokeShape="RoundRectangle 8">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnFotoTapped" />
+                            <DragGestureRecognizer DragStarting="OnFotoDragStarting" />
+                            <DropGestureRecognizer AllowDrop="True" Drop="OnFotoDropped" />
+                        </Border.GestureRecognizers>
+                        <Grid RowDefinitions="120,Auto">
+                            <Image Source="{Binding RutaImagen}" Aspect="AspectFill" />
+                            <Grid Grid.Row="1">
+                                <Label Text="{Binding Nombre}"
+                                       FontSize="12"
+                                       LineBreakMode="TailTruncation"
+                                       VerticalOptions="Center"
+                                       Margin="6,4" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

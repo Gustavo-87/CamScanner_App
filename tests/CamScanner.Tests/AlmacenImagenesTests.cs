@@ -112,6 +112,36 @@ public class AlmacenImagenesTests : IDisposable
         Assert.False(_almacen.Eliminar(ruta));
     }
 
+    [Theory]
+    [InlineData("foto.jpg", ".jpg")]
+    [InlineData("foto.JPEG", ".jpeg")]
+    [InlineData("foto.PNG", ".png")]
+    [InlineData("foto.webp", ".webp")]
+    [InlineData("foto.heic", ".heic")]
+    [InlineData("foto.gif", ".jpg")]
+    public void ExtensionSegura_AceptaSoloFormatosDeImagenPermitidos(
+        string? nombreOriginal, string extensionEsperada)
+    {
+        Assert.Equal(extensionEsperada, AlmacenImagenes.ExtensionSegura(nombreOriginal));
+    }
+
+    [Fact]
+    public async Task GuardarAsync_ContenidoVacio_CreaArchivoVacio()
+    {
+        using var origen = new MemoryStream();
+
+        var ruta = await _almacen.GuardarAsync(origen, "vacio.png");
+
+        Assert.True(File.Exists(ruta));
+        Assert.Empty(await File.ReadAllBytesAsync(ruta));
+    }
+
+    [Fact]
+    public void Constructor_CarpetaNula_LanzaExcepcion()
+    {
+        Assert.Throws<ArgumentNullException>(() => new AlmacenImagenes(null!));
+    }
+
     /// <summary>Simula una lectura que falla (por ejemplo, la foto se corrompe o se corta el acceso).</summary>
     private sealed class StreamQueFalla : Stream
     {

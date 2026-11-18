@@ -11,6 +11,8 @@ public class Documento
     [Indexed]
     public int LoteId { get; set; }
 
+    public int Orden { get; set; }
+
     [NotNull]
     public string Nombre { get; set; } = string.Empty;
 

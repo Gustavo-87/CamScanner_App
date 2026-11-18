@@ -1,38 +1,92 @@
 using CamScanner.Models;
-using Plugin.Maui.OCR;
+using Microsoft.Extensions.DependencyInjection;
+using CamScanner.Data;
+using CamScanner.Services;
 
 namespace CamScanner;
+
+/// <summary>El OCR no está registrado o la plataforma no lo soporta (único caso en que se avisa "no disponible").</summary>
+public sealed class OcrNoDisponibleException : Exception
+{
+    public OcrNoDisponibleException(string mensaje, Exception? inner = null) : base(mensaje, inner) { }
+}
 
 public partial class DetallePage : ContentPage
 {
     private readonly Documento _doc;
+    private readonly IOcrService? _ocrService;
+
+    // El motor se inicializa una sola vez por sesión, no en cada toque
+    private static readonly SemaphoreSlim _initLock = new(1, 1);
+    private static bool _ocrInicializado;
 
     private bool _ocrEnCurso;
+    private bool _navegando;
     private bool _avisoAbreEditor;
+    private bool _ocrAutoLanzado;
     private int _avisoId;
+    private readonly CamScannerDatabase _database =
+        IPlatformApplication.Current!.Services
+              .GetRequiredService<CamScannerDatabase>();
 
-    /// <summary>Se dispara después de cambiar datos del documento.</summary>
+    private readonly ExcelExportService _excelExportService = new();
+
+    /// <summary>Si es true, al abrir la página se lanza el OCR (o el editor si ya hay texto).</summary>
+    public bool IniciarOcrAlAbrir { get; init; }
+
     public event Action<Documento>? Actualizado;
-
-    /// <summary>Se dispara cuando el usuario confirma eliminar; quien lo recibe borra archivo y registro.</summary>
     public event Action<Documento>? Eliminado;
 
-    public DetallePage(Documento doc)
+    public DetallePage(Documento doc, IOcrService? ocrService)
     {
         InitializeComponent();
         _doc = doc;
+        _ocrService = ocrService;
         TituloLabel.Text = doc.Nombre;
         Imagen.Source = ImageSource.FromFile(doc.RutaImagen);
     }
 
-    private async void OnAtrasClicked(object? sender, EventArgs e) => await Navigation.PopAsync();
+    public DetallePage(Documento doc) : this(doc, ResolverOcr()) { }
+
+    private static IOcrService? ResolverOcr() =>
+        IPlatformApplication.Current?.Services.GetService<IOcrService>()
+        ?? Application.Current?.Handler?.MauiContext?.Services.GetService<IOcrService>();
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (IniciarOcrAlAbrir && !_ocrAutoLanzado)
+        {
+            _ocrAutoLanzado = true;
+            _ = IniciarOcrAsync();
+        }
+    }
+
+    private async void OnAtrasClicked(object? sender, EventArgs e)
+    {
+        if (_navegando)
+            return;
+
+        _navegando = true;
+        try
+        {
+            await Navigation.PopAsync();
+        }
+        finally
+        {
+            _navegando = false;
+        }
+    }
 
     // ================= OCR =================
 
-    private async void OnTextoTapped(object? sender, TappedEventArgs e)
+    private async void OnTextoTapped(object? sender, TappedEventArgs e) => await IniciarOcrAsync();
+
+    private async Task IniciarOcrAsync()
     {
         if (_ocrEnCurso)
-            return; // ya está reconociendo; el indicador lo muestra
+            return;
 
         // Si ya hay texto guardado, se abre directo el editor
         if (!string.IsNullOrWhiteSpace(_doc.TextoExtraido))
@@ -41,8 +95,41 @@ public partial class DetallePage : ContentPage
             return;
         }
 
-        // Sin await: el OCR corre en segundo plano y el usuario sigue viendo la imagen
         _ = ReconocerTextoAsync();
+    }
+
+    /// <summary>Devuelve el servicio listo para usar o lanza OcrNoDisponibleException.</summary>
+    private async Task<IOcrService> ObtenerOcrListoAsync()
+    {
+        var ocr = _ocrService
+            ?? throw new OcrNoDisponibleException("IOcrService no está registrado en MauiProgram.");
+
+        if (_ocrInicializado)
+            return ocr;
+
+        await _initLock.WaitAsync();
+        try
+        {
+            if (!_ocrInicializado)
+            {
+                try
+                {
+                    await ocr.InitAsync();
+                }
+                catch (Exception ex) when (ex is NotSupportedException or FeatureNotSupportedException)
+                {
+                    throw new OcrNoDisponibleException("La plataforma no soporta OCR.", ex);
+                }
+
+                _ocrInicializado = true; // si InitAsync falla, no se marca y se reintenta
+            }
+        }
+        finally
+        {
+            _initLock.Release();
+        }
+
+        return ocr;
     }
 
     private async Task ReconocerTextoAsync()
@@ -50,43 +137,79 @@ public partial class DetallePage : ContentPage
         _ocrEnCurso = true;
         MostrarProgreso("Reconociendo texto…");
 
+        string? texto = null;
+        string? error = null;
+
         try
         {
-            await OcrPlugin.Default.InitAsync();
+            if (!File.Exists(_doc.RutaImagen))
+                throw new FileNotFoundException("La imagen no existe.", _doc.RutaImagen);
 
-            var bytes = await File.ReadAllBytesAsync(_doc.RutaImagen);
-            var resultado = await OcrPlugin.Default.RecognizeTextAsync(bytes);
-
-            if (!resultado.Success || string.IsNullOrWhiteSpace(resultado.AllText))
-            {
-                await MostrarAvisoAsync("No se detectó texto", abreEditor: false);
-                return;
-            }
-
-            _doc.TextoExtraido = resultado.AllText;
-            Actualizado?.Invoke(_doc);
-            await MostrarAvisoAsync("Texto listo · Toca para ver", abreEditor: true);
+            var ocr = await ObtenerOcrListoAsync();
+            texto = await ocr.RecognizeTextAsync(_doc.RutaImagen);
+        }
+        catch (OcrNoDisponibleException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"OCR no disponible: {ex}");
+            error = "El OCR no está disponible en este dispositivo";
+        }
+        catch (FileNotFoundException)
+        {
+            error = "La imagen ya no existe en el dispositivo";
+        }
+        catch (OperationCanceledException)
+        {
+            OcultarProgreso();
+            return;
         }
         catch (Exception ex)
         {
+            // Fallo real y temporal: NO se dice "no disponible"
             System.Diagnostics.Debug.WriteLine($"Error de OCR: {ex}");
-            await MostrarAvisoAsync("No se pudo reconocer el texto", abreEditor: false);
+            error = "No se pudo reconocer el texto. Inténtalo de nuevo";
         }
         finally
         {
-            _ocrEnCurso = false;
+            _ocrEnCurso = false; // se libera antes del aviso para poder reintentar
         }
+
+        if (error is not null)
+        {
+            await MostrarAvisoAsync(error, abreEditor: false);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(texto))
+        {
+            await MostrarAvisoAsync("No se detectó texto", abreEditor: false);
+            return;
+        }
+
+        _doc.TextoExtraido = texto;
+        Actualizado?.Invoke(_doc); // MainPage lo persiste en SQLite (resuelve el TODO)
+        await MostrarAvisoAsync("Texto listo · Toca para ver", abreEditor: true);
     }
 
     private async Task AbrirEditorAsync()
     {
+        if (_navegando)
+            return;
+
+        _navegando = true;
         var pagina = new TextoPage(_doc.Nombre, _doc.TextoExtraido ?? string.Empty);
         pagina.Guardado += texto =>
         {
             _doc.TextoExtraido = texto;
             Actualizado?.Invoke(_doc);
         };
-        await Navigation.PushAsync(pagina);
+        try
+        {
+            await Navigation.PushAsync(pagina);
+        }
+        finally
+        {
+            _navegando = false;
+        }
     }
 
     // ================= Indicador de progreso discreto =================
@@ -137,8 +260,85 @@ public partial class DetallePage : ContentPage
 
     private async void OnExcelTapped(object? sender, TappedEventArgs e)
     {
-        // TODO: exportar la información del documento a Excel
-        await DisplayAlertAsync("Próximamente", "Aquí se exportará la información del documento a Excel.", "OK");
+        try
+        {
+            var lotes = await _database.ObtenerLotesAsync();
+            var lote = lotes.FirstOrDefault(l => l.Id == _doc.LoteId);
+
+            if (lote is null)
+            {
+                await DisplayAlertAsync("Error",
+                    "No se encontró el lote asociado al documento.", "OK");
+                return;
+            }
+
+            var contenido = _excelExportService.ExportarDocumento(_doc, lote.Nombre);
+            var nombreArchivo = $"CamScanner_{_doc.Id}_{Guid.NewGuid():N}.xlsx";
+            var ruta = Path.Combine(FileSystem.CacheDirectory, nombreArchivo);
+
+            await File.WriteAllBytesAsync(ruta, contenido);
+
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "Exportar documento a Excel",
+                File = new ShareFile(
+                    ruta,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al exportar",
+                $"No se pudo generar el archivo Excel: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnGuardarExcelTapped(object? sender, TappedEventArgs e)
+    {
+        try
+        {
+            var lote = (await _database.ObtenerLotesAsync())
+                .FirstOrDefault(l => l.Id == _doc.LoteId);
+            if (lote is null)
+            {
+                await DisplayAlertAsync("Error", "No se encontró el lote asociado al documento.", "OK");
+                return;
+            }
+
+            var guardado = await ArchivoService.GuardarAsync(
+                _excelExportService.ExportarDocumento(_doc, lote.Nombre),
+                $"CamScanner_{_doc.Id}.xlsx");
+
+            if (guardado)
+                await DisplayAlertAsync("Guardado", "El archivo Excel se guardó correctamente.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al guardar", $"No se pudo guardar el Excel: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnGuardarFotoTapped(object? sender, TappedEventArgs e)
+    {
+        try
+        {
+            if (!File.Exists(_doc.RutaImagen))
+            {
+                await DisplayAlertAsync("Archivo no encontrado", "La imagen ya no existe en el dispositivo.", "OK");
+                return;
+            }
+
+            var guardado = await ArchivoService.GuardarAsync(
+                await File.ReadAllBytesAsync(_doc.RutaImagen),
+                $"{_doc.Nombre}.jpg");
+
+            if (guardado)
+                await DisplayAlertAsync("Guardado", "La foto se guardó correctamente.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error al guardar", $"No se pudo guardar la foto: {ex.Message}", "OK");
+        }
     }
 
     private async void OnCompartirTapped(object? sender, TappedEventArgs e)

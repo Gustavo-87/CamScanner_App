@@ -1,394 +1,156 @@
-# Plan de pruebas --- CamScanner
+# Plan de pruebas - CamScanner
 
-**Proyecto:** CamScanner · Android · .NET 10 / .NET MAUI\
-**Revisión documental:** 17 de noviembre de 2026\
-**Responsable de pruebas reportado en la documentación del equipo:**
-Javier Serna\
-**Documentación y calidad:** Richard Prado\
-**Especificación:** [docs/especificacion.md](especificacion.md)
+**Proyecto:** CamScanner - Android - .NET 10 / .NET MAUI
+**Versión del plan:** 2.0 - Revisión basada en la implementacion actual
+**Responsable de pruebas:** Javier Serna
+**Documentación y calidad:** Richard Prado
+**Especificación vigente:** [docs/especificacion.md](especificacion.md)
 
 ## 1. Objetivo y alcance
 
-Registrar los casos de prueba definidos para CamScanner y distinguir
-entre: - implementación identificada mediante revisión del código; -
-pruebas automatizadas ejecutadas; - pruebas funcionales o de aceptación
-ejecutadas en dispositivo; - pruebas pendientes de ejecución o
-evidencia.
-
-No se recibió un reporte adicional de resultados funcionales de Javier
-para esta actualización. Por tanto, no se atribuyen aprobaciones
-funcionales a casos que no cuentan con evidencia de ejecución.
-
-El alcance incluye captura e importación de imágenes, OCR, revisión y
-edición de texto, gestión de lotes y documentos, persistencia SQLite y
-exportación Excel. La exportación Excel permanece pendiente de
-implementación. No se incluye exportación ZIP/PDF.
-
-## 2. Entorno y herramientas
-
-  -----------------------------------------------------------------------
-  Elemento                            Información disponible
-  ----------------------------------- -----------------------------------
-  Lenguaje y plataforma               C# / .NET 10
-
-  Interfaz                            .NET MAUI
-
-  Plataforma principal                Android
-
-  Persistencia                        SQLite mediante `sqlite-net-pcl`
-                                      1.11.285
-
-  OCR                                 `Plugin.Maui.OCR` 1.1.1
-
-  Pruebas automatizadas               xUnit
-
-  SDK .NET reportado por ejecución    .NET 10.0.14 en salida de pruebas
-
-  Entorno de ejecución funcional      No reportado para esta
-                                      actualización
-
-  Android SDK                         No localizado durante el intento de
-                                      compilación Android; error XA5300
-  -----------------------------------------------------------------------
-
-## 3. Clasificación de estados
-
--   **Implementado; pendiente de prueba funcional:** se identificó
-    código para la función, pero no se aportó evidencia de ejecución en
-    dispositivo.
--   **Parcial:** existe parte del comportamiento, pero no se demuestra
-    el cumplimiento completo del requisito.
--   **Pendiente de implementación:** no se identificó implementación
-    funcional en el código revisado.
--   **Aprobado:** existe resultado de ejecución verificable para el caso
-    concreto.
--   **No ejecutado:** no se aportó evidencia de ejecución del caso.
-
-La clasificación de implementación no reemplaza el resultado de una
-prueba.
-
-## 4. Casos de prueba funcionales
-
-  ---------------------------------------------------------------------------------
-  ID             Requisito      Escenario      Resultado esperado  Estado actual
-  -------------- -------------- -------------- ------------------- ----------------
-  CP-01          RF-01          Capturar       Imagen capturada y  Implementado;
-                                fotografía con disponible en un    pendiente de
-                                permiso        lote.               prueba funcional
-                                concedido.
-
-  CP-02          RF-01          Denegar        Mensaje claro, sin  Manejo previsto
-                                permiso de     cierre inesperado.  en código;
-                                cámara.                            pendiente de
-                                                                   prueba
-
-  CP-03          RF-02          Importar       Imagen incorporada  Implementado;
-                                imagen         al lote             pendiente de
-                                compatible.    seleccionado.       prueba funcional
-
-  CP-04          RF-02          Cancelar       Se conserva el      Manejo de
-                                selector de    estado actual.      cancelación
-                                imágenes.                          presente;
-                                                                   pendiente de
-                                                                   prueba
-
-  CP-05          RF-03          Procesar       OCR local reconoce  OCR integrado;
-                                imagen legible texto sin conexión. modo sin
-                                sin Internet.                      conexión
-                                                                   pendiente de
-                                                                   validar
-
-  CP-06          RF-03          Procesar       Se informa          Manejo de
-                                imagen borrosa resultado parcial o resultado sin
-                                o sin texto.   ausencia de texto.  texto presente;
-                                                                   pendiente de
-                                                                   prueba
-
-  CP-07          RF-04          Revisar        Texto reconocido    Implementado en
-                                resultado OCR. visible para el     código;
-                                               usuario.            pendiente de
-                                                                   prueba
-
-  CP-08          RF-05          Seleccionar    Se conservan solo   Selección
-                                algunos datos  los datos elegidos. estructurada no
-                                reconocidos.                       evidenciada;
-                                                                   pendiente
-
-  CP-09          RF-06          Corregir texto Texto corregido se  Editor y evento
-                                reconocido.    conserva.           de guardado
-                                                                   presentes;
-                                                                   pendiente de
-                                                                   prueba
-
-  CP-10          RF-07          Crear lote     Lote registrado.    Implementado;
-                                válido.                            pendiente de
-                                                                   prueba funcional
-
-  CP-11          RF-08          Consultar      Se muestran lotes   Implementado;
-                                lotes.         existentes.         pendiente de
-                                                                   prueba funcional
-
-  CP-12          RF-09          Modificar      Cambios guardados.  Implementado;
-                                lote.                              pendiente de
-                                                                   prueba funcional
-
-  CP-13          RF-10          Eliminar lote  Lote deja de        Implementado en
-                                sin            aparecer.           código;
-                                documentos.                        pendiente de
-                                                                   prueba
-
-  CP-14          RF-10          Eliminar lote  Se impide la        Validación
-                                con documentos eliminación y se    presente;
-                                asociados.     informa al usuario. pendiente de
-                                                                   prueba
-
-  CP-15          RF-11          Crear          Documento           Implementado;
-                                documento y    registrado y        pendiente de
-                                asociarlo a    relacionado.        prueba funcional
-                                lote.
-
-  CP-16          RF-12          Consultar      Se muestran los     Consulta general
-                                documentos de  documentos          y por lote
-                                un lote.       correspondientes.   presente en
-                                                                   datos; pendiente
-                                                                   de prueba
-
-  CP-17          RF-13          Modificar      Cambios guardados.  Renombrado y
-                                documento.                         actualización de
-                                                                   texto presentes;
-                                                                   pendiente de
-                                                                   prueba
-
-  CP-18          RF-14          Eliminar       Registro y archivo  Implementado en
-                                documento.     de imagen dejan de  código;
-                                               estar disponibles.  pendiente de
-                                                                   prueba
-
-  CP-19          RF-15          Guardar y      Registros           Persistencia
-                                reiniciar      confirmados         implementada;
-                                aplicación.    persisten en        prueba de
-                                               SQLite.             reinicio
-                                                                   pendiente
-
-  CP-20          RF-16          Exportar       Excel con datos     Pendiente de
-                                documento      seleccionados.      implementación
-                                individual.
-
-  CP-21          RF-17          Exportar lote. Excel con datos de  Pendiente de
-                                               documentos del      implementación
-                                               lote.
-
-  CP-22          RF-18          Provocar error Mensaje claro y     Manejo de
-                                controlado.    datos confirmados   errores parcial;
-                                               conservados.        pendiente de
-                                                                   prueba integral
-  ---------------------------------------------------------------------------------
-
-## 5. Casos de prueba no funcionales
-
-  --------------------------------------------------------------------------------------
-  ID             Requisito      Descripción de la    Resultado esperado Estado actual
-                                prueba
-  -------------- -------------- -------------------- ------------------ ----------------
-  CP-23          RNF-03         Ejecutar OCR sin     OCR funciona sin   Pendiente de
-                                conexión.            Internet.          validación
-
-  CP-24          RNF-04         Reiniciar después de Datos disponibles  Persistencia en
-                                guardar.             nuevamente.        código; prueba
-                                                                        pendiente
-
-  CP-25          RNF-02         Procesar conjunto    Duración           Pendiente
-                                representativo de    registrada y sin
-                                imágenes.            bloqueos
-                                                     inaceptables.
-
-  CP-26          RNF-10         Abrir archivo Excel  Datos legibles y   Pendiente de
-                                generado.            correspondientes a implementación y
-                                                     la selección.      prueba
-
-  CP-27          RNF-01         Revisar que las      Navegación y       Pendiente de
-                                opciones principales acciones           evaluación
-                                sean comprensibles.  principales
-                                                     claras.
-
-  CP-28          RNF-05         Interrumpir una      Sin pérdida        Pendiente
-                                operación controlada inesperada de
-                                y volver a utilizar  información
-                                la aplicación.       confirmada.
-
-  CP-29          RNF-06         Instalar y ejecutar  La aplicación      Pendiente;
-                                en dispositivo o     inicia y permite   compilación
-                                emulador Android     utilizar las       bloqueada por
-                                compatible.          funciones          XA5300 en el
-                                                     disponibles.       entorno
-                                                                        reportado
-
-  CP-30          RNF-07         Revisar organización Estructura         Revisión
-                                del código y         comprensible y     estática
-                                separación de        mantenible.        parcial;
-                                responsabilidades.                      pendiente de
-                                                                        evaluación
-                                                                        formal
-
-  CP-31          RNF-08         Revisar              Tratamiento        Pendiente
-                                almacenamiento,      conforme a las
-                                permisos y           condiciones de
-                                transmisiones de     privacidad.
-                                información.
-
-  CP-32          RNF-09         Verificar relación   Sin asociaciones   Validaciones en
-                                entre lotes y        inconsistentes ni  código;
-                                documentos al        pérdida            pendiente de
-                                registrar, modificar accidental.        prueba funcional
-                                o eliminar.
-  --------------------------------------------------------------------------------------
-
-## 6. Registro de pruebas automatizadas
-
-El 17 de noviembre de 2026 se ejecutó el comando:
-
-``` powershell
-dotnet test .\tests\CamScanner.Tests\CamScanner.Tests.csproj
-```
-
-Resultado reportado por la consola:
-
-  Indicador                                            Resultado
-  -------------------------------------------------- -----------
-  Total de pruebas                                            29
-  Aprobadas                                                   29
-  Fallidas                                                     0
-  Omitidas                                                     0
-  Resultado de compilación del proyecto de pruebas      Correcto
-
-### 6.1. Archivos de pruebas identificados
-
-**`AlmacenImagenesTests.cs`** - Copia del contenido al almacenamiento. -
-Conservación de extensiones conocidas y uso de `.jpg` como
-alternativa. - Creación de carpeta cuando no existe. - Generación de
-rutas diferentes para archivos con el mismo nombre. - Propagación de
-errores de lectura sin dejar archivos incompletos. - Eliminación de
-archivos existentes. - Manejo de archivos inexistentes y rutas vacías.
-
-**`ValidadorNombresTests.cs`** - Generación de nombres consecutivos. -
-Tratamiento de consecutivos inválidos. - Generación del siguiente nombre
-disponible. - Omisión de nombres ocupados. - Normalización de mayúsculas
-y espacios. - Validación de listas vacías, nombres vacíos y
-duplicados. - Aceptación de nombres únicos.
-
-Las 29 pruebas automatizadas corresponden a estos componentes. No deben
-contabilizarse como aprobación de los casos funcionales CP-01 a CP-22 ni
-de los casos no funcionales CP-23 a CP-32.
-
-## 7. Verificación de compilación
-
-Se ejecutó:
-
-``` powershell
-dotnet build .\src\CamScanner.csproj -f net10.0-android
-```
-
-Resultado: compilación no completada. Se reportó el error `XA5300`,
-debido a que no se encontró el directorio Android SDK.
-
-Esta incidencia corresponde a la configuración del entorno de
-compilación. No demuestra por sí sola un defecto funcional de la
-aplicación.
-
-## 8. Registro de ejecución funcional
-
-No se recibió un reporte adicional de ejecución funcional de Javier para
-esta actualización. Los siguientes campos deben completarse cuando se
-realicen pruebas en dispositivo:
-
-  ID        Fecha            Dispositivo/emulador   Resultado          Evidencia/incidencia
-  --------- ---------------- ---------------------- ------------------ ----------------------
-  CP-\_\_   **/**/\_\_\_\_   \_\_                   Aprobado/Fallido   \_\_
-
-No marcar un caso como aprobado sin evidencia de ejecución.
-
-## 9. Criterios de entrada
-
--   Aplicación compilada e instalada en dispositivo o emulador Android
-    compatible.
--   Datos de prueba preparados.
--   Permisos y recursos disponibles.
--   Imágenes de referencia con texto conocido para OCR.
--   Documentos de prueba para exportación, cuando esta funcionalidad
-    esté implementada.
-
-## 10. Criterios de salida
-
--   Casos ejecutados y resultados registrados.
--   Evidencias asociadas a los casos.
--   Defectos clasificados y vinculados con los casos correspondientes.
--   Fallos críticos corregidos o reportados.
--   Resultados automatizados y funcionales informados por separado.
-
-## 11. Evidencias recomendadas
-
--   Captura de fotografía con cámara.
--   Importación de una y varias imágenes.
--   Creación, edición y eliminación de lotes.
--   Registro, consulta, renombrado y eliminación de documentos.
--   OCR ejecutado con imagen de referencia.
--   OCR ejecutado sin conexión, si se confirma el requisito.
--   Edición y guardado del texto reconocido.
--   Persistencia después de cerrar y abrir la aplicación.
--   Archivo Excel individual y por lote, cuando estén implementados.
--   Manejo de permisos denegados y errores.
--   Salida de consola de las 29 pruebas automatizadas.
-
-## 12. Matriz de trazabilidad de requisitos
-
-### 12.1. Requisitos funcionales
-
-  Requisito   Criterio de aceptación   Caso(s) de prueba
-  ----------- ------------------------ -------------------
-  RF-01       CA-01                    CP-01, CP-02
-  RF-02       CA-02                    CP-03, CP-04
-  RF-03       CA-03                    CP-05, CP-06
-  RF-04       CA-04                    CP-07
-  RF-05       CA-05                    CP-08
-  RF-06       CA-06                    CP-09
-  RF-07       CA-07                    CP-10
-  RF-08       CA-08                    CP-11
-  RF-09       CA-09                    CP-12
-  RF-10       CA-10                    CP-13, CP-14
-  RF-11       CA-11                    CP-15
-  RF-12       CA-12                    CP-16
-  RF-13       CA-13                    CP-17
-  RF-14       CA-14                    CP-18
-  RF-15       CA-15                    CP-19
-  RF-16       CA-16                    CP-20
-  RF-17       CA-17                    CP-21
-  RF-18       CA-18                    CP-22
-
-### 12.2. Requisitos no funcionales
-
-  Requisito                              Caso de prueba
-  -------------------------------------- ----------------
-  RNF-01 - Usabilidad                    CP-27
-  RNF-02 - Desempeño                     CP-25
-  RNF-03 - Funcionamiento sin conexión   CP-23
-  RNF-04 - Persistencia                  CP-24
-  RNF-05 - Confiabilidad                 CP-28
-  RNF-06 - Compatibilidad Android        CP-29
-  RNF-07 - Mantenibilidad                CP-30
-  RNF-08 - Privacidad                    CP-31
-  RNF-09 - Integridad                    CP-32
-  RNF-10 - Legibilidad de exportación    CP-26
-
-### 12.3. Resultado de trazabilidad
-
--   Requisitos funcionales relacionados con criterios y pruebas: 18 de
-    18.
--   Requisitos no funcionales asociados a casos: 10 de 10.
--   Casos definidos: 32.
--   Casos funcionales aprobados con evidencia individual en esta
-    actualización: ninguno reportado.
--   Pruebas automatizadas aprobadas: 29 de 29, registradas por separado.
-
-La trazabilidad documental está establecida. El cumplimiento funcional
-debe determinarse mediante la ejecución de los casos y el registro de
-evidencias.
+Verificar las funciones actuales: creación y gestión de lotes, captura e importación de imágenes, SQLite, OCR local, revisión y edición de texto, ordenación de documentos, exportación a Excel y exportación ZIP. La apertura del diálogo nativo de compartir se valida manualmente en la plataforma.
+
+## 2. Funciones confirmadas
+
+- Android `net10.0-android`, API mínima configurada 23.
+- Importacion múltiple mediante `MediaPicker`, con límite de 10 imágenes por selección.
+- Imagenes copiadas a `AppDataDirectory/documentos` y registros almacenados en SQLite.
+- OCR mediante `IOcrService`, local en Android/iOS, con inicialización única por sesion.
+- Editor de texto completo con copiar, limpiar, corregir y guardar.
+- Reordenamiento por arrastre en la vista interior.
+- Menú DB para cambiar lote, ID, nombre y orden; normalización por lote a `0..n-1` sin repetidos.
+- Exportacion individual desde detalle y exportación de lotes desde la selección de lotes.
+- Exportación ZIP de lotes seleccionados, incluyendo el Excel y las imágenes disponibles.
+- Los botones de guardar Excel/ZIP y compartir Excel/ZIP están disponibles según la plataforma.
+- La opción de exportar del menu contextual principal muestra `Próximamente`.
+
+## 3. Casos de prueba funcionales
+
+| ID    | Requisito    | Escenario                                                              | Resultado esperado                                                                 | Estado   |
+| ----- | ------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------- |
+| CP-01 | RF-07        | Crear lote válido; cancelar; usar nombre vacío o repetido.             | Solo se crea con nombre válido y único; aparece en la lista.                       | Pendiente de validación funcional |
+| CP-02 | RF-08/RF-09  | Consultar lotes; cambiar nombre y descripción; recargar.               | Lotes y cambios se muestran sin duplicarse y persisten.                            | Pendiente de validación funcional |
+| CP-03 | RF-10        | Eliminar lote vacío, cancelar y eliminar lote con documentos.          | Vacio se elimina; cancelar conserva; lote con documentos se rechaza.               | Pendiente de validación funcional |
+| CP-04 | RF-01        | Conceder permiso y capturar foto para un lote.                         | Imagen copiada, documento creado y visible en el lote.                             | Pendiente de validación funcional |
+| CP-05 | RF-01/RF-18  | Denegar permiso o usar dispositivo sin cámara.                         | Mensaje claro, sin cierre y sin documento nuevo.                                   | Pendiente de validación funcional |
+| CP-06 | RF-02        | Importar una imagen, varias, 10, mas de 10 y cancelar selector.        | Imagenes incorporadas, se respeta límite 10 y cancelar no cambia datos.            | Pendiente de validación funcional |
+| CP-07 | RF-11/RF-12  | Revisar, abrir y consultar documento desde tarjeta y lote.             | ID, ruta, fecha, lote, imagen y orden son Pendiente de validación funcionals.                               | Pendiente de validación funcional |
+| CP-08 | RF-03/RNF-03 | Ejecutar OCR sobre imagen legible sin Internet.                        | Texto reconocido localmente y asociado al documento.                               | Pendiente de validación funcional |
+| CP-09 | RF-03/RF-18  | OCR sobre imagen borrosa, sin texto, inexistente o con error temporal. | Resultado/error controlado sin pérdida ni cierre.                                  | Pendiente de validación funcional |
+| CP-10 | RF-04        | Abrir aviso de texto listo o documento con OCR existente.              | Editor visible y no se ejecuta OCR innecesariamente.                               | Pendiente de validación funcional |
+| CP-11 | RF-06        | Editar, guardar, reabrir, copiar selección, copiar todo y limpiar.     | Correccion persiste; copiar y limpiar respetan la accion confirmada.               | Pendiente de validación funcional |
+| CP-12 | RF-13        | Renombrar documento y modificar ID, lote, nombre y orden desde DB.     | Valores válidos se guardan; ID o nombre duplicado, o lote inexistente, se rechaza. | Pendiente de validación funcional |
+| CP-13 | RF-13/RNF-09 | Mover un documento entre dos lotes con documentos existentes.          | Origen y destino quedan con órdenes `0..n-1`, sin repetidos ni huecos.             | Pendiente de validación funcional |
+| CP-14 | RF-13/RNF-09 | Introducir órdenes negativos, duplicados y con huecos.                 | Normalización deja cada lote numerado desde `0`.                                   | Pendiente de validación funcional |
+| CP-15 | RF-13        | Arrastrar tres documentos en vista interior y recargar.                | Orden visual persistente.                                                          | Pendiente de validación funcional |
+| CP-16 | RF-14        | Eliminar documento confirmando y cancelando.                           | Confirmar elimina registro/imagen; cancelar conserva.                              | Pendiente de validación funcional |
+| CP-17 | RF-15        | Crear, editar, mover y eliminar; cerrar y abrir aplicación.            | SQLite conserva cambios confirmados y no reaparecen eliminados.                    | Pendiente de validación funcional |
+| CP-18 | RF-16        | Exportar documento desde detalle con y sin OCR; guardar y cancelar.    | XLSX legible; guardar funciona y cancelar no modifica datos.                       | Pendiente de validación funcional |
+| CP-19 | RF-17        | Exportar uno o varios lotes con documentos.                            | Una hoja por lote, documentos ordenados por `Orden`.                               | Pendiente de validación funcional |
+| CP-20 | RNF-10       | Exportar con nombres duplicados, inválidos y de mas de 31 caracteres.  | XLSX abre y sus hojas son validas, unicas y truncadas cuando procede.              | Pendiente de validación funcional |
+| CP-21 | RF-18        | Compartir imagen existente y repetir con ruta inexistente.             | Compartir funciona o informa error controlado.                                     | Pendiente de validación funcional |
+| CP-22 | RF-18        | Provocar fallo de almacenamiento, OCR o exportación.                   | Mensaje claro, sin cierre y datos confirmados conservados.                         | Pendiente de validación funcional |
+| CP-23 | RF-17        | Generar ZIP con uno o varios lotes, Excel e imágenes existentes.        | ZIP válido con `CamScanner_Lotes.xlsx` y carpetas por lote.                        | Pendiente de validación funcional |
+| CP-24 | RF-17        | Generar ZIP con lotes vacíos o imágenes inexistentes.                   | Lotes vacíos se omiten; el Excel se conserva y no se agregan imágenes inexistentes. | Pendiente de validación funcional |
+| CP-25 | RF-17        | Intentar generar ZIP sin documentos.                                   | Se informa que no hay lotes con documentos y no se genera un archivo válido.        | Pendiente de validación funcional |
+| CP-26 | RF-18        | Pulsar guardar/compartir Excel o ZIP en Android.                       | Se abre el selector del sistema o se guarda el archivo; no hay bloqueo ni pérdida.  | Manual |
+
+## 4. Brechas actuales
+
+| ID    | Relacion     | Verificacion                                                | Resultado actual                                                                        | Estado    |
+| ----- | ------------ | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------- |
+| BG-01 | RF-05/CA-05  | Buscar selección de campos individuales del OCR.            | Solo existe texto completo; redefinir RF-05 o implementar.                              | Pendiente |
+| BG-02 | RF-16        | Exportar desde menu contextual principal.                   | Muestra `Próximamente`; actualmente se prueba desde detalle.                            | Pendiente |
+| BG-03 | RF-03        | Ejecutar OCR fuera de Android/iOS.                          | Servicio no registrado fuera de esas plataformas.                                       | Pendiente |
+| BG-04 | RF-02/RNF-02 | Definir formatos, tamaños, idiomas y tiempos OCR.           | Parámetros no definidos.                                                                | Pendiente |
+| BG-05 | RNF-07       | Revisar el proyecto independiente de pruebas automatizadas. | Existe `tests/CamScanner.Tests`; su cobertura se ejecuta y debe mantenerse actualizada. | Pendiente |
+
+## 5. Pruebas automatizables propuestas
+
+La suite automatizada cubre `ValidadorNombres`, `AlmacenImagenes`, `ExcelExportService`, `ZipExportService` y `CamScannerDatabase`, incluyendo validaciones, archivos parciales, XLSX, ZIP, CRUD, movimientos y normalización `0..n-1`. La llamada al selector nativo de compartir (`Share.Default`) requiere una prueba manual en Android/iOS/Windows.
+
+## 6. Casos no funcionales
+
+| ID     | Requisito | Prueba                                                                | Criterio de aceptación                                 | Estado   |
+| ------ | --------- | --------------------------------------------------------------------- | ------------------------------------------------------ | -------- |
+| NFR-01 | RNF-01    | Usuario nuevo completa crear lote, importar, OCR, editar y exportar.  | Navegación y mensajes comprensibles.                   | Pendiente de validación funcional |
+| NFR-02 | RNF-02    | Medir OCR con 1, 10 y 20 imágenes y exportación de varios lotes.      | Duración registrada, sin bloqueos; umbral por definir. | Pendiente de validación funcional |
+| NFR-03 | RNF-03    | Ejecutar OCR y consultar datos sin red.                               | OCR y SQLite funcionan offline.                        | Pendiente de validación funcional |
+| NFR-04 | RNF-04    | Reiniciar después de operaciones confirmadas.                         | Lotes, documentos, texto, rutas y órdenes persisten.   | Pendiente de validación funcional |
+| NFR-05 | RNF-05    | Cancelar selectores, permisos, compartir, guardado y OCR.             | Sin cierres ni pérdida confirmada.                     | Pendiente de validación funcional |
+| NFR-06 | RNF-06    | Probar Android API 23 o superior, dispositivo y emulador.             | Instala, inicia y completa flujos compatibles.         | Pendiente de validación funcional |
+| NFR-07 | RNF-07    | Revisar separación de paginas, servicios, modelos y SQLite; compilar. | Solución compilable y responsabilidades localizables.  | Pendiente de validación funcional |
+| NFR-08 | RNF-08    | Revisar permisos, almacenamiento, logs y tráfico.                     | Datos locales y sin transmisión no autorizada.         | Pendiente de validación funcional |
+| NFR-09 | RNF-09    | Ejecutar movimientos, cambios de ID, eliminación y normalización.     | Sin huérfanos ni órdenes repetidas.                    | Pendiente de validación funcional |
+| NFR-10 | RNF-10    | Abrir XLSX y comparar con la fuente.                                  | Hojas, texto, fechas, nombres y orden Pendiente de validación funcionals.       | Pendiente de validación funcional |
+
+## 7. Entrada y salida
+
+### Criterios de entrada
+
+- Compilacion correcta del proyecto .NET 10 MAUI.
+- APK instalada en Android con cámara, galería, almacenamiento y compartir.
+- Permisos disponibles para conceder y denegar.
+- Imagenes sin datos personales y con texto OCR conocido.
+- Aplicacion para abrir XLSX y recurso para guardar/compartir.
+- Procedimiento para limpiar la base local entre ciclos.
+
+### Criterios de salida
+
+- Casos ejecutados con fecha, version, dispositivo y evidencia.
+- Ningún defecto crítico que impida capturar, persistir, consultar, ordenar o exportar.
+- Casos bloqueados/no aplicables justificados y brechas decididas.
+- Fallos de integridad, pérdida de datos, cierres o corrupción de Excel corregidos o aceptados.
+
+## 8. Registro de ejecución
+
+La última ejecución automatizada local del proyecto `tests/CamScanner.Tests` obtuvo 65 pruebas correctas, 0 fallidas y 0 omitidas. Este resultado cubre servicios puros y SQLite temporal, incluyendo la unicidad de nombres de lotes y documentos por lote, la generación de XLSX y ZIP; no sustituye las pruebas manuales de cámara, permisos, OCR nativo, navegación, selector de compartir o integración Android.
+
+| ID                 | Fecha                        | Versión/commit | Dispositivo/emulador | Datos usados                | Resultado                              | Evidencia/incidencia                                         |
+| ------------------ | ---------------------------- | -------------- | -------------------- | --------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| Suite automatizada | Fecha pendiente de registrar | `net10.0`      | Ejecución local      | Servicios y SQLite temporal | 65 aprobadas / 0 fallidas / 0 omitidas | `dotnet test tests/CamScanner.Tests/CamScanner.Tests.csproj` |
+
+## 9. Evidencias mínimas
+
+- Capturas de creación, permisos, importación, OCR y edición.
+- Vista antes y después de mover/reordenar, con órdenes `0,1,2...`.
+- Persistencia después de reiniciar sin datos personales.
+- XLSX individual y por lote abiertos y comparados con la fuente.
+- Mensajes de error y conservación de datos confirmados.
+- Resultado de compilación y reporte automatizado cuando exista.
+
+## 10. Trazabilidad
+
+| Requisito | Casos principales                 | Estado                             |
+| --------- | --------------------------------- | ---------------------------------- |
+| RF-01     | CP-04, CP-05                      | Pendiente de validación funcional                           |
+| RF-02     | CP-06                             | Pendiente de validación funcional                           |
+| RF-03     | CP-08, CP-09                      | Pendiente de validación funcional                           |
+| RF-04     | CP-10                             | Pendiente de validación funcional                           |
+| RF-05     | BG-01                             | Brecha no implementada             |
+| RF-06     | CP-11                             | Pendiente de validación funcional                           |
+| RF-07     | CP-01                             | Pendiente de validación funcional                           |
+| RF-08     | CP-02, CP-07                      | Pendiente de validación funcional                           |
+| RF-09     | CP-02                             | Pendiente de validación funcional                           |
+| RF-10     | CP-03                             | Pendiente de validación funcional                           |
+| RF-11     | CP-04, CP-06, CP-07               | Pendiente de validación funcional                           |
+| RF-12     | CP-07, CP-10                      | Pendiente de validación funcional                           |
+| RF-13     | CP-12, CP-13, CP-14, CP-15        | Pendiente de validación funcional; incluye normalización    |
+| RF-14     | CP-16                             | Pendiente de validación funcional                           |
+| RF-15     | CP-17, NFR-04                     | Pendiente de validación funcional                           |
+| RF-16     | CP-18, BG-02                      | Parcial: menu contextual pendiente |
+| RF-17     | CP-19, CP-20                      | Pendiente de validación funcional                           |
+| RF-18     | CP-05, CP-06, CP-09, CP-21, CP-22 | Pendiente de validación funcional                           |
+
+| RNF    | Caso asociado | Estado    |
+| ------ | ------------- | --------- |
+| RNF-01 | NFR-01        | Pendiente de validación funcional  |
+| RNF-02 | NFR-02, BG-04 | Pendiente de validación funcional  |
+| RNF-03 | NFR-03, BG-03 | Pendiente |
+| RNF-04 | NFR-04        | Pendiente de validación funcional  |
+| RNF-05 | NFR-05        | Pendiente de validación funcional  |
+| RNF-06 | NFR-06        | Pendiente de validación funcional  |
+| RNF-07 | NFR-07, BG-05 | Pendiente de validación funcional  |
+| RNF-08 | NFR-08        | Pendiente de validación funcional  |
+| RNF-09 | NFR-09        | Pendiente de validación funcional  |
+| RNF-10 | NFR-10, CP-20 | Pendiente de validación funcional  |

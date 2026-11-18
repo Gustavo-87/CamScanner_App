@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using CamScanner.Data;
+using CommunityToolkit.Maui;
 
 namespace CamScanner;
 
@@ -10,15 +11,22 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseMauiCommunityToolkit()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-#if DEBUG
-		builder.Logging.AddDebug();
+#if ANDROID || IOS
+        builder.Services.AddSingleton<IOcrService, OcrService>();
 #endif
+#if DEBUG
+        builder.Logging.AddDebug();
+
+#endif
+
+
 
 builder.Services.AddSingleton<CamScannerDatabase>();
 		return builder.Build();

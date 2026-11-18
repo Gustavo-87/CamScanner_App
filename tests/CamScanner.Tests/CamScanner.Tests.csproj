@@ -9,7 +9,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.1" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
 		<PackageReference Include="xunit" Version="2.9.3" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
 	</ItemGroup>
@@ -19,7 +21,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="..\..\src\Services\*.cs" LinkBase="Services" />
+		<Compile Include="..\..\src\Services\AlmacenImagenes.cs" Link="Services\AlmacenImagenes.cs" />
+		<Compile Include="..\..\src\Services\ExcelExportService.cs" Link="Services\ExcelExportService.cs" />
+		<Compile Include="..\..\src\Services\ZipExportService.cs" Link="Services\ZipExportService.cs" />
+		<Compile Include="..\..\src\Services\ValidadorNombres.cs" Link="Services\ValidadorNombres.cs" />
+		<Compile Include="..\..\src\Data\CamScannerDatabase.cs" Link="Data\CamScannerDatabase.cs" />
+		<Compile Include="..\..\src\Models\*.cs" LinkBase="Models" />
 	</ItemGroup>
 
 </Project>
