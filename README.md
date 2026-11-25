@@ -8,7 +8,15 @@ CamScanner permite capturar fotografías de documentos o importar imágenes desd
 
 La aplicación busca facilitar la consulta, edición y conservación de la información digitalizada, manteniendo los datos en el dispositivo mediante SQLite.
 
-## 2. Estado actual de la aplicación
+## 2. Integrantes y roles
+
+| Integrante | Usuario de GitHub | Rol principal |
+|---|---|---|
+| Javier Serna | [Larz-Dev](https://github.com/Larz-Dev) | Desarrollo, integración y pruebas |
+| Richard Prado | [RichardP98](https://github.com/RichardP98) | Documentación y calidad |
+| Gustavo Piedrahita | [Gustavo-87](https://github.com/Gustavo-87) | Desarrollo e integración |
+
+## 3. Estado actual de la aplicación
 
 La siguiente tabla refleja las funcionalidades identificadas en el código fuente de la versión revisada.
 
@@ -26,17 +34,17 @@ La siguiente tabla refleja las funcionalidades identificadas en el código fuent
 | Renombrar documentos | Implementado |
 | Eliminar documentos | Implementado |
 | Visualización de imágenes | Implementada |
-| Reconocimiento de texto OCR | Integrado en el código; validación funcional pendiente |
+| Reconocimiento de texto OCR | Integrado y validado funcionalmente en Android |
 | Edición del texto reconocido | Implementada |
 | Copia de texto al portapapeles | Implementada |
 | Compartir imágenes | Implementado |
 | Exportación a Excel | Implementada: individual y consolidada por lote, verificada en Android |
 
-**Estado de validación:** la última ejecución local registró 65 pruebas aprobadas, 0 fallidas y 0 omitidas. Las pruebas incluyen almacenamiento, validación de nombres, SQLite y exportaciones Excel y ZIP. No representan una validación integral de todas las funcionalidades de la aplicación.
+**Estado de validación:** el 17 de noviembre de 2026 se ejecutaron correctamente las pruebas funcionales en un emulador Android Pixel 7 - API 36.0 (Android 16) y en un Xiaomi 23090RA98G - Android 16.0 / API 36 (Redmi Note 13 Pro+ 5G). La ejecución se referencia al commit `20d44705efe1443b3643ab5abad6f17f6d419d58`. Además, la última ejecución automatizada registró 65 pruebas aprobadas, 0 fallidas y 0 omitidas. El alcance y las brechas conocidas se detallan en `docs/plan-de-pruebas.md`.
 
 La compilación Android requiere configurar el Android SDK en el entorno de desarrollo. En la última verificación se obtuvo el error XA5300 por ausencia de dicha configuración.
 
-## 3. Tecnologías y dependencias
+## 4. Tecnologías y dependencias
 
 | Tecnología | Uso |
 |---|---|
@@ -49,7 +57,7 @@ La compilación Android requiere configurar el Android SDK en el entorno de desa
 | Microsoft.Extensions.Logging.Debug 10.0.0 | Registro de eventos de depuración |
 | xUnit | Pruebas automatizadas |
 
-## 4. Requisitos de instalación
+## 5. Requisitos de instalación
 
 Para trabajar con el proyecto se requiere:
 
@@ -63,7 +71,7 @@ Para trabajar con el proyecto se requiere:
 
 El proyecto declara los siguientes destinos: Android, iOS, MacCatalyst y Windows. Android es la plataforma principal del desarrollo; los demás destinos requieren sus respectivos entornos y verificaciones.
 
-## 5. Instalación del proyecto
+## 6. Instalación del proyecto
 
 Clonar el repositorio:
 
@@ -89,7 +97,7 @@ Restaurar las dependencias:
 dotnet restore src/CamScanner.csproj
 ```
 
-## 6. Compilación y ejecución
+## 7. Compilación y ejecución
 
 Compilar el proyecto para Android:
 
@@ -101,7 +109,7 @@ Para ejecutar la aplicación, configurar un dispositivo Android o emulador y uti
 
 **Nota:** la compilación Android no podrá completarse si el Android SDK no está instalado o configurado correctamente.
 
-## 7. Ejecución de pruebas automatizadas
+## 8. Ejecución de pruebas automatizadas
 
 El proyecto cuenta con un conjunto de pruebas desarrollado con xUnit.
 
@@ -116,18 +124,18 @@ dotnet test tests/CamScanner.Tests/CamScanner.Tests.csproj
 - `AlmacenImagenesTests.cs`: almacenamiento, extensión de archivos, generación de rutas únicas, eliminación y manejo de errores.
 - `ValidadorNombresTests.cs`: generación de nombres consecutivos, normalización, validación de nombres vacíos y detección de duplicados.
 
-### Último resultado registrado
+### Último resultado automatizado registrado
 
 | Indicador | Resultado |
 |---|---:|
-| Pruebas ejecutadas | 29 |
-| Aprobadas | 29 |
+| Pruebas ejecutadas | 65 |
+| Aprobadas | 65 |
 | Fallidas | 0 |
 | Omitidas | 0 |
 
-Estos resultados corresponden a la ejecución automatizada registrada durante la revisión del 17 de noviembre de 2026.
+Estos resultados corresponden a la ejecución automatizada registrada durante la revisión del 17 de noviembre de 2026. La validación funcional en los dispositivos Android indicados se encuentra registrada en el plan de pruebas.
 
-## 8. Estructura del repositorio
+## 9. Estructura del repositorio
 
 ```text
 CamScanner_App/
@@ -165,7 +173,7 @@ CamScanner_App/
         └── ValidadorNombresTests.cs
 ```
 
-## 9. Documentación del proyecto
+## 10. Documentación del proyecto
 
 La documentación técnica se encuentra en la carpeta `docs/`:
 

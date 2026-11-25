@@ -1,10 +1,13 @@
 # Plan de pruebas - CamScanner
 
 **Proyecto:** CamScanner - Android - .NET 10 / .NET MAUI
-**Versión del plan:** 2.0 - Revisión basada en la implementacion actual
+**Versión del plan:** 2.1 - Validación funcional en Android
 **Responsable de pruebas:** Javier Serna
 **Documentación y calidad:** Richard Prado
 **Especificación vigente:** [docs/especificacion.md](especificacion.md)
+**Fecha de ejecución funcional:** 17 de noviembre de 2026
+**Commit validado:** `20d44705efe1443b3643ab5abad6f17f6d419d58`
+**Entornos:** emulador Android Pixel 7 - API 36.0 (Android 16) y Xiaomi 23090RA98G - Android 16.0 / API 36 (Redmi Note 13 Pro+ 5G)
 
 ## 1. Objetivo y alcance
 
@@ -53,7 +56,7 @@ Verificar las funciones actuales: creación y gestión de lotes, captura e impor
 | CP-23 | RF-17        | Generar ZIP con uno o varios lotes, Excel e imágenes existentes.        | ZIP válido con `CamScanner_Lotes.xlsx` y carpetas por lote.                        | Correcto |
 | CP-24 | RF-17        | Generar ZIP con lotes vacíos o imágenes inexistentes.                   | Lotes vacíos se omiten; el Excel se conserva y no se agregan imágenes inexistentes. | Correcto |
 | CP-25 | RF-17        | Intentar generar ZIP sin documentos.                                   | Se informa que no hay lotes con documentos y no se genera un archivo válido.        | Correcto |
-| CP-26 | RF-18        | Pulsar guardar/compartir Excel o ZIP en Android.                       | Se abre el selector del sistema o se guarda el archivo; no hay bloqueo ni pérdida.  | Manual |
+| CP-26 | RF-18        | Pulsar guardar/compartir Excel o ZIP en Android.                       | Se abre el selector del sistema o se guarda el archivo; no hay bloqueo ni pérdida.  | Correcto |
 
 ## 4. Brechas actuales
 
@@ -104,11 +107,12 @@ La suite automatizada cubre `ValidadorNombres`, `AlmacenImagenes`, `ExcelExportS
 
 ## 8. Registro de ejecución
 
-La última ejecución automatizada local del proyecto `tests/CamScanner.Tests` obtuvo 65 pruebas correctas, 0 fallidas y 0 omitidas. Este resultado cubre servicios puros y SQLite temporal, incluyendo la unicidad de nombres de lotes y documentos por lote, la generación de XLSX y ZIP; no sustituye las pruebas manuales de cámara, permisos, OCR nativo, navegación, selector de compartir o integración Android.
+La ejecución funcional de los casos CP-01 a CP-26 se realizó correctamente el 17 de noviembre de 2026 en los dos entornos Android indicados en la cabecera. La ejecución se referencia al commit `20d44705efe1443b3643ab5abad6f17f6d419d58`. La suite automatizada local del proyecto `tests/CamScanner.Tests` obtuvo 65 pruebas correctas, 0 fallidas y 0 omitidas; cubre servicios puros y SQLite temporal, incluyendo la unicidad de nombres de lotes y documentos por lote, la generación de XLSX y ZIP.
 
 | ID                 | Fecha                        | Versión/commit | Dispositivo/emulador | Datos usados                | Resultado                              | Evidencia/incidencia                                         |
 | ------------------ | ---------------------------- | -------------- | -------------------- | --------------------------- | -------------------------------------- | ------------------------------------------------------------ |
-| Suite automatizada | Fecha pendiente de registrar | `net10.0`      | Ejecución local      | Servicios y SQLite temporal | 65 aprobadas / 0 fallidas / 0 omitidas | `dotnet test tests/CamScanner.Tests/CamScanner.Tests.csproj` |
+| Pruebas funcionales Android | 17/11/2026 | `20d44705efe1443b3643ab5abad6f17f6d419d58` | Pixel 7 (emulador), Android 16 / API 36; Xiaomi 23090RA98G (Redmi Note 13 Pro+ 5G), Android 16 / API 36 | Flujos de captura, lotes, documentos, OCR, Excel y ZIP | CP-01 a CP-26 correctos | Validación funcional en ambos entornos |
+| Suite automatizada | 17/11/2026 | `20d44705efe1443b3643ab5abad6f17f6d419d58` | Ejecución local | Servicios y SQLite temporal | 65 aprobadas / 0 fallidas / 0 omitidas | `dotnet test tests/CamScanner.Tests/CamScanner.Tests.csproj` |
 
 ## 9. Evidencias mínimas
 

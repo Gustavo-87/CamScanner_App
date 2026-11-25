@@ -2,27 +2,29 @@
 
 **Proyecto:** CamScanner · Ingeniería de Software II (2026-2)\
 **Fecha de actualización:** 17 de noviembre de 2026\
-**Rama revisada:** `documentacion-richard`
+**Rama revisada:** `main`
 
 ## Actualización de integración — 17 de noviembre de 2026
 
-Esta actualización complementa la revisión documental de Richard Prado con verificaciones posteriores realizadas durante la integración.
+Esta actualización complementa la revisión documental de Richard Prado con la validación funcional realizada durante la integración.
 
 - **Pruebas automatizadas:** 65 ejecutadas, 65 aprobadas, 0 fallidas y 0 omitidas.
-- **Excel:** exportación individual y consolidada por lote implementadas; verificadas en tableta Android.
+- **Validación funcional Android:** los casos CP-01 a CP-26 se ejecutaron correctamente el 17 de noviembre de 2026 en un emulador Pixel 7 - API 36.0 (Android 16) y en un Xiaomi 23090RA98G - Android 16.0 / API 36 (Redmi Note 13 Pro+ 5G).
+- **Commit de referencia:** `20d44705efe1443b3643ab5abad6f17f6d419d58`, creado por Javier Serna el 17 de noviembre de 2026 a las 19:35 (-05:00).
+- **Excel:** exportación individual y consolidada por lote implementadas y verificadas en Android.
 - **SQLite:** existen nuevas pruebas automatizadas de la capa de datos.
-- **ZIP:** se incorporó un servicio de exportación y pruebas automatizadas; su funcionamiento en Android requiere validación funcional específica.
+- **ZIP:** se incorporó un servicio de exportación y pruebas automatizadas; su funcionamiento se validó funcionalmente en Android.
 - **Compilación Android:** exitosa en el entorno macOS de integración. El error `XA5300` corresponde al entorno de desarrollo reportado por Richard.
-- **OCR:** integrado; la validación funcional completa y sin conexión sigue pendiente de evidencia suficiente.
+- **OCR:** integrado y validado funcionalmente en los entornos Android registrados.
 
-Los resultados automatizados no equivalen a la aprobación de todos los casos de aceptación CP-01 a CP-32.
+La validación funcional registrada cubre los casos CP-01 a CP-26. Las brechas de alcance BG-01 y BG-02 permanecen documentadas y no deben confundirse con fallos de los casos ejecutados.
 
 ---
 
 
 **Proyecto:** CamScanner · Ingeniería de Software II (2026-2)\
 **Fecha de actualización:** 17 de noviembre de 2026\
-**Rama revisada:** `documentacion-richard`
+**Rama revisada:** `main`
 
 Evaluar el estado comprobable de CamScanner a partir de la revisión del
 código fuente, las dependencias, la documentación y los resultados de
@@ -52,17 +54,17 @@ actual:
 También se consideraron las salidas de `dotnet test` y `dotnet build`
 compartidas el 17 de noviembre de 2026.
 
-**Limitaciones de la evaluación:** - No se recibió un reporte adicional
-de resultados funcionales de Javier. - No se aportaron evidencias
-individuales de ejecución de los casos CP-01 a CP-32. - La compilación
-Android no se completó por falta de configuración del Android SDK. - No
-se confirmó mediante prueba en dispositivo el comportamiento del OCR,
-cámara, galería o persistencia. - No se implementó ni verificó la
-exportación Excel. - La revisión de código no sustituye pruebas de
-aceptación ni una evaluación integral de calidad.
+**Limitaciones de la evaluación:** - La validación funcional registrada
+cubre los casos CP-01 a CP-26 en Android; las brechas BG-01 y BG-02
+permanecen pendientes. - La compilación Android puede depender de la
+configuración del Android SDK en cada entorno de desarrollo. - Los
+resultados documentados no incluyen evidencias gráficas adjuntas. - La
+revisión de código y las pruebas registradas no sustituyen una evaluación
+integral de calidad en todas las plataformas declaradas.
 
-Por tanto, este informe representa una evaluación técnica documental y
-automatizada parcial, no una certificación integral del producto.
+Por tanto, este informe representa una evaluación técnica documental,
+automatizada y funcional en Android, no una certificación integral del
+producto en todas las plataformas.
 
 ## 3. Estado técnico comprobado
 
@@ -179,10 +181,9 @@ Normalización de mayúsculas y espacios. - Validación de listas vacías. -
 Detección de nombres vacíos y duplicados. - Validación de nombres
 únicos.
 
-En la revisión inicial de Richard, las 29 pruebas aprobadas correspondían a los componentes automatizados
-indicados. No demuestran por sí solas el funcionamiento de la cámara,
-OCR, interfaz MAUI, base de datos SQLite, exportación Excel ni
-compatibilidad en dispositivos.
+La suite automatizada actualmente registra 65 pruebas aprobadas, que
+cubren servicios, SQLite, Excel y ZIP. Los casos funcionales CP-01 a CP-26
+se validaron adicionalmente en los dos entornos Android registrados.
 
 ## 5. Resultados de compilación
 
@@ -343,27 +344,25 @@ herramientas. No todos representan defectos funcionales reproducidos.
   ID                Hallazgo          Severidad         Estado
                                       sugerida
   ----------------- ----------------- ----------------- -----------------
-  H-01              La exportación    Alta              Pendiente de
-                    Excel muestra                       implementación
-                    mensajes de
-                    próxima
-                    disponibilidad y
-                    no cuenta con
-                    implementación
-                    identificada.
+  H-01              El menú contextual Alta              Pendiente por
+                     principal aún                       alcance
+                     muestra
+                     `Próximamente`; la
+                     exportación desde
+                     detalle sí está
+                     implementada.
 
-  H-02              OCR integrado en  Alta              Pendiente de
-                    el código, pero                     validación
-                    sin evidencia de
-                    prueba funcional
-                    en dispositivo.
+  H-02              Ampliar la       Media             Mejora recomendada
+                     cobertura de OCR
+                     con más imágenes
+                     de referencia.
 
-  H-03              La compilación    Media             Incidencia de
-                    Android no se                       entorno pendiente
-                    completó por
-                    error XA5300.
+  H-03              La compilación    Media             Incidencia del
+                     Android puede                      entorno de desarrollo
+                     requerir SDK
+                     configurado.
 
-  H-04              Los 29 tests      Media             Ampliación
+  H-04              Los 65 tests      Media             Ampliación
                     automatizados                       recomendada
                     cubren
                     almacenamiento de
@@ -373,13 +372,7 @@ herramientas. No todos representan defectos funcionales reproducidos.
                     los flujos de
                     negocio.
 
-  H-05              No se recibió     Media             Sin reporte
-                    reporte adicional                   disponible
-                    de resultados
-                    funcionales de
-                    Javier.
-
-  H-06              La relación       Media             Revisión técnica
+  H-05              La relación       Media             Revisión técnica
                     lote-documento se                   pendiente
                     valida mediante
                     lógica de
@@ -388,18 +381,17 @@ herramientas. No todos representan defectos funcionales reproducidos.
                     clave foránea
                     SQLite.
 
-  H-07              No se aportaron   Media             Pendiente de
-                    evidencias                          ejecución y
-                    individuales de                     registro
-                    ejecución de
-                    CP-01 a CP-32.
+  H-06              No se adjuntaron  Media             Pendiente de
+                     capturas o                          anexar evidencia
+                     evidencias gráficas                 documental
+                     individuales.
   -----------------------------------------------------------------------
 
 ### 8.1. Incidencias de entorno y defectos del producto
 
 -   **Incidencia de entorno:** H-03, por ausencia del Android SDK.
--   **Pendientes de producto:** H-01, H-02 y H-06.
--   **Pendientes de verificación/documentación:** H-04, H-05 y H-07.
+-   **Pendientes de producto:** H-01 y H-05.
+-   **Pendientes de verificación/documentación:** H-02, H-03, H-04 y H-06.
 
 La ausencia de evidencia no debe interpretarse automáticamente como un
 defecto reproducido.
@@ -408,45 +400,40 @@ defecto reproducido.
 
 La especificación contiene 18 requisitos funcionales y 10 requisitos no
 funcionales. El plan de pruebas relaciona los requisitos funcionales con
-los criterios CA-01 a CA-18 y con los casos CP-01 a CP-22; también
-asocia los requisitos no funcionales con CP-23 a CP-32.
+los criterios CA-01 a CA-18 y con los casos CP-01 a CP-26; también
+asocia los requisitos no funcionales con los casos NFR-01 a NFR-10.
 
-La relación documental está establecida, pero no se cuenta con
-resultados individuales para declarar aprobados los casos funcionales y
-no funcionales.
+La relación documental está establecida y el plan registra como correctos
+los casos funcionales ejecutados en Android y las 65 pruebas automatizadas.
+Las brechas BG-01 y BG-02 permanecen diferenciadas de los casos aprobados.
 
-Las 29 pruebas de la revisión inicial se registraron de forma independiente y no
-deben sumarse como casos de aceptación aprobados.
+La suite automatizada y la validación funcional se registran por separado:
+las primeras cubren servicios y SQLite, mientras la segunda cubre los flujos
+de aceptación ejecutados en Android.
 
 ## 10. Acciones de mejora priorizadas
 
 1.  Mantener la compilación Android verificada y documentar los entornos utilizados.
-2.  Instalar y ejecutar la aplicación en un dispositivo o emulador
-    Android compatible.
-3.  Validar captura e importación, incluyendo permisos y cancelaciones.
-4.  Ejecutar pruebas de OCR con imágenes de referencia y comprobar el
-    funcionamiento sin conexión.
-5.  Validar edición y persistencia del texto reconocido.
-6.  Probar el CRUD de lotes y documentos, incluyendo integridad de
-    asociaciones.
-7.  Ampliar las pruebas funcionales de exportación Excel individual y por lote.
-8.  Mantener y ampliar las pruebas automatizadas de SQLite, Excel, ZIP y reglas de negocio.
-9.  Ejecutar los casos CP-01 a CP-32 que correspondan y registrar fecha,
-    entorno, resultado y evidencia.
-10. Registrar defectos reproducibles y vincularlos con requisitos y
+2.  Mantener la validación en los dos entornos Android registrados.
+3.  Redefinir o implementar la selección de campos individuales de RF-05.
+4.  Implementar la exportación desde el menú contextual principal.
+5.  Ampliar las pruebas de OCR, Excel y ZIP con más datos de referencia.
+6.  Mantener y ampliar las pruebas automatizadas de SQLite, Excel, ZIP y reglas de negocio.
+7.  Adjuntar capturas o evidencias individuales de los casos funcionales.
+8.  Registrar defectos reproducibles y vincularlos con requisitos y
     casos de prueba.
-11. Actualizar los estados documentales después de cada nueva ejecución.
+9.  Actualizar los estados documentales después de cada nueva ejecución.
 
 ## 11. Conclusión
 
 CamScanner incorpora gestión de lotes y documentos, captura e importación de imágenes, persistencia SQLite, integración OCR, edición de texto y exportaciones Excel y ZIP.
 
-La exportación Excel individual y consolidada por lote fue implementada y verificada en una tableta Android. La exportación ZIP cuenta con implementación y pruebas automatizadas, pero requiere validación funcional específica en dispositivo.
+La exportación Excel individual y consolidada por lote fue implementada y verificada en los dos entornos Android registrados. La exportación ZIP cuenta con implementación, pruebas automatizadas y validación funcional en dispositivo.
 
 Durante la integración del 17 de noviembre de 2026 se ejecutaron 65 pruebas automatizadas: 65 aprobadas, 0 fallidas y 0 omitidas. Estas incluyen pruebas de almacenamiento, validación de nombres, SQLite y exportaciones.
 
 La compilación Android se realizó correctamente en el entorno macOS de integración. El error XA5300 documentado corresponde al entorno de desarrollo de Richard y no representa un defecto confirmado de la aplicación.
 
-Permanecen pendientes las evidencias suficientes para declarar completamente validado el OCR sin conexión y los casos de aceptación funcional que no hayan sido ejecutados.
+Permanecen como brechas de producto la selección de campos individuales de RF-05 y la exportación desde el menú contextual principal. La validación funcional de los casos CP-01 a CP-26 quedó registrada en el plan de pruebas.
 
-En consecuencia, CamScanner presenta avances funcionales comprobados, aunque la aprobación integral de calidad requiere completar las pruebas de aceptación y registrar sus respectivas evidencias.
+En consecuencia, CamScanner presenta los flujos funcionales registrados como correctos en Android; la aprobación integral de calidad requiere resolver las brechas de alcance y anexar las evidencias documentales disponibles.

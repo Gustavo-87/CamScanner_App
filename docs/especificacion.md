@@ -19,8 +19,9 @@ almacenarlas localmente, agrupar documentos en lotes y utilizar
 reconocimiento óptico de caracteres (OCR) para obtener texto que puede
 revisarse y editarse.
 
-La exportación de información a Excel forma parte del alcance previsto,
-pero permanece pendiente de implementación en la versión revisada.
+La exportación de información a Excel forma parte del alcance implementado:
+se admite la exportación individual y consolidada por lote. La exportación
+ZIP incluye el archivo Excel generado y las imágenes disponibles.
 
 ### 1.3 Definiciones
 
@@ -258,8 +259,8 @@ implementación identificada y validación pendiente.
 -   Definir idiomas reconocidos y campos que se extraen.
 -   Precisar si la selección de información OCR será por texto completo
     o por campos estructurados.
--   Seleccionar e integrar una biblioteca Excel.
--   Definir la estructura de los archivos Excel.
+-   Ampliar la validación de Excel con más combinaciones de documentos y
+    lotes.
 -   Definir la versión mínima Android y los dispositivos objetivo.
 -   Evaluar imágenes sin texto, borrosas o de baja calidad.
 -   Confirmar los permisos y el tratamiento de datos en el entorno
@@ -267,9 +268,11 @@ implementación identificada y validación pendiente.
 
 ## 7. Estado de implementación revisado
 
-La siguiente clasificación se basa en la revisión del código fuente
-compartido el 17 de noviembre de 2026. No equivale a una aprobación de
-pruebas funcionales.
+La siguiente clasificación se basa en la revisión del código fuente y en la
+validación funcional realizada el 17 de noviembre de 2026 en un emulador
+Pixel 7 - API 36.0 (Android 16) y en un Xiaomi 23090RA98G - Android 16.0 /
+API 36 (Redmi Note 13 Pro+ 5G), referenciada al commit
+`20d44705efe1443b3643ab5abad6f17f6d419d58`.
 
   -----------------------------------------------------------------------
   Requisito               Estado de               Validación
@@ -338,15 +341,12 @@ pruebas funcionales.
                           persistencia SQLite
                           presentes.
 
-  RF-16                   Exportación individual  Pendiente
-                          a Excel no
-                          implementada; la
-                          interfaz muestra aviso
-                          de próxima
-                          disponibilidad.
+   RF-16                   Exportación individual  Validado en Android
+                           a Excel implementada.
 
-  RF-17                   Exportación por lote no Pendiente
-                          implementada.
+   RF-17                   Exportación por lote  Validado en Android
+                           implementada, incluyendo
+                           Excel dentro del ZIP.
 
   RF-18                   Existen mensajes de     Parcial / pendiente
                           error en varios flujos;
